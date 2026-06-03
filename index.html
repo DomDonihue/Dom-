@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DOM en Línea</title><!-- script.js actualiza esto desde config.js -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="topbar">
+    <div class="container nav">
+      <a id="headerBrandLink" href="#" class="brand">
+        <img id="headerLogo" src="" alt="" class="brand-logo-img" style="display:none">
+        <span id="headerNombre" class="brand-nombre"></span>
+      </a>
+      <nav class="menu">
+        <a href="#inicio">Inicio</a>
+        <a href="#beneficios">Información</a>
+        <a href="#certificados">Certificados</a>
+        <a href="#preparar-solicitud">Preparar solicitud</a>
+        <a href="#documentos">Documentos</a>
+        <a href="#faq">Preguntas frecuentes</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <div class="hero-overlay"></div>
+    <div class="container hero-grid">
+      <div class="hero-left">
+        <span class="eyebrow" id="heroEyebrow"></span>
+        <h1 id="heroTitulo"></h1>
+        <h2 id="heroSubtitulo"></h2>
+        <p id="heroDescripcion"></p>
+        <div class="hero-actions">
+          <a class="btn btn-accent btn-lg" id="btnHeroDom" href="#" target="_blank">Ingresar a DOM en Línea</a>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-indicators">
+          <div class="indicator-card">
+            <div class="indicator-icon">⏱</div>
+            <div><strong>Ahorra tiempo</strong><p>Trámites más rápidos</p></div>
+          </div>
+          <div class="indicator-card">
+            <div class="indicator-icon">💻</div>
+            <div><strong>100% Online</strong><p>Sin filas ni traslados</p></div>
+          </div>
+          <div class="indicator-card">
+            <div class="indicator-icon">🛡</div>
+            <div><strong>Seguro y confiable</strong><p>Plataforma oficial y segura</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIDEO -->
+  <section id="seccionVideo" class="section video-section">
+    <div class="container video-grid">
+      <div class="video-box">
+        <video id="videoEl" controls preload="metadata">
+          <source id="videoSrc" src="./img/video/VideoDOM.mp4" type="video/mp4">
+          Tu navegador no soporta el video.
+        </video>
+      </div>
+      <div class="video-info">
+        <span class="section-kicker">Transformación digital</span>
+        <h2 id="videoTitulo"></h2>
+        <p id="videoDescripcion"></p>
+        <a class="btn btn-accent" id="btnVideoDom" href="#" target="_blank">Ir a DOM en Línea</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFICIOS -->
+  <section class="section" id="beneficios">
+    <div class="container cards-3">
+      <article class="info-card">
+        <div class="info-icon purple">🏛</div>
+        <h3>¿Qué es DOM en Línea?</h3>
+        <p>Es la plataforma digital para gestionar certificados y trámites asociados a la Dirección de Obras Municipales.</p>
+      </article>
+      <article class="info-card">
+        <div class="info-icon orange">⚙</div>
+        <h3>¿Para qué sirve?</h3>
+        <p>Permite orientar a los usuarios, agilizar procesos y facilitar la solicitud de certificados municipales.</p>
+      </article>
+      <article class="info-card">
+        <div class="info-icon blue">🖱</div>
+        <h3>¿Cómo lo uso?</h3>
+        <p>Selecciona el certificado, revisa los requisitos, prepara tus antecedentes y luego accede a la plataforma oficial.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- CERTIFICADOS -->
+  <section class="section" id="certificados">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Servicios disponibles</span>
+          <h2>Certificados disponibles</h2>
+        </div>
+      </div>
+      <div class="accordion" id="certificadosAccordion"></div>
+    </div>
+  </section>
+
+  <!-- FORMULARIO CIP -->
+  <section class="section" id="preparar-solicitud">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Asistente ciudadano</span>
+          <h2>Preparar solicitud paso a paso</h2>
+        </div>
+      </div>
+      <div class="flujo-pasos">
+        <div class="flujo-paso activo" id="pasoUbicacion">1. Seleccionar ubicación</div>
+        <div class="flujo-paso"        id="pasoFormulario">2. Completar datos</div>
+        <div class="flujo-paso"        id="pasoPdf">3. Descargar PDF</div>
+      </div>
+      <div class="solicitud-grid solicitud-grid-flujo">
+        <!-- Mapa -->
+        <div class="solicitud-card solicitud-card-principal" id="tarjetaUbicacion">
+          <span class="paso-etiqueta">Paso 1</span>
+          <h3>Ubicación del predio</h3>
+          <p class="form-help">Busca la dirección o marca el punto directamente en el mapa. Los datos se completarán automáticamente.</p>
+          <div class="map-search">
+            <input type="text" id="buscarDireccion" placeholder="Ej: Avenida Estación 344">
+            <button type="button" class="btn btn-accent" id="btnBuscarMapa">Buscar</button>
+          </div>
+          <div id="mapaPredio"></div>
+          <div class="coordenadas-box">
+            <strong>Coordenadas seleccionadas:</strong>
+            <p id="coordenadasTexto">Aún no se ha seleccionado una ubicación.</p>
+            <p id="estadoUbicacion" class="estado-flujo pendiente">Seleccione una ubicación para continuar.</p>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" id="btnConfirmarUbicacion">Confirmar Dirección y Continuar</button>
+          </div>
+        </div>
+        <!-- Formulario -->
+        <form id="solicitudForm" class="solicitud-card formulario-solicitud">
+          <span class="paso-etiqueta">Paso 2</span>
+          <h3>Datos del solicitante</h3>
+          <div class="form-grid">
+            <div class="form-group"><label>Nombre completo</label><input type="text" id="nombre" placeholder="Ej: Juan Pérez González"></div>
+            <div class="form-group"><label>RUT</label><input type="text" id="rut" placeholder="Ej: 12.345.678-9"></div>
+            <div class="form-group"><label>E-mail</label><input type="email" id="email" placeholder="correo@ejemplo.cl"></div>
+            <div class="form-group"><label>Teléfono</label><input type="text" id="telefono" placeholder="Ej: 9 1234 5678"></div>
+          </div>
+          <h3>Datos de la propiedad</h3>
+          <p class="form-help aviso-autocompletado">Estos datos se completan desde el mapa. Revísalos y corrige si es necesario.</p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tipo de zona</label>
+              <select id="zona"><option value="">Seleccionar</option><option value="urbano">Urbano</option><option value="rural">Rural</option></select>
+            </div>
+            <div class="form-group"><label>Calle o camino</label><input type="text" id="calle" placeholder="Se completará desde el mapa"></div>
+            <div class="form-group">
+              <label>Número</label>
+              <input type="text" id="numero" placeholder="Se completará desde el mapa">
+              <label class="check-sn"><input type="checkbox" id="sinNumero"> Predio sin número / S.N.</label>
+            </div>
+            <div class="form-group"><label>Departamento</label><input type="text" id="depto" placeholder="Opcional"></div>
+            <div class="form-group"><label>Block</label><input type="text" id="block" placeholder="Opcional"></div>
+            <div class="form-group"><label>Manzana</label><input type="text" id="manzana" placeholder="Opcional"></div>
+            <div class="form-group"><label>Lote</label><input type="text" id="lote" placeholder="Opcional"></div>
+            <div class="form-group"><label>Loteo o localidad</label><input type="text" id="localidad" placeholder="Se completará desde el mapa"></div>
+            <div class="form-group"><label>Plano de loteo N°</label><input type="text" id="planoLoteo" placeholder="Opcional"></div>
+            <div class="form-group"><label>Rol SII</label><input type="text" id="rolSii" placeholder="Ej: 123-45" required></div>
+          </div>
+          <input type="hidden" id="latitud">
+          <input type="hidden" id="longitud">
+          <div class="form-actions">
+            <button type="button" class="btn btn-accent"  id="btnGuardarDatos"  disabled>Validar datos</button>
+            <button type="button" class="btn btn-accent"  id="btnGenerarPdf"    disabled>Descargar formulario PDF</button>
+            <button type="button" class="btn btn-outline" id="btnImprimirPdf"   disabled>Imprimir formulario</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECURSOS -->
+  <section class="section" id="documentos">
+    <div class="container mini-cards" id="recursosContenedor"></div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="container faq-grid">
+      <div class="panel">
+        <div class="section-heading inside">
+          <div>
+            <span class="section-kicker">Ayuda ciudadana</span>
+            <h2>Preguntas frecuentes</h2>
+          </div>
+        </div>
+        <div id="faqContenedor"></div>
+      </div>
+      <div class="cta-box">
+        <span class="section-kicker dark">Acceso directo</span>
+        <h2>Ingresa ahora a DOM en Línea</h2>
+        <p>Cuando ya tengas identificado tu certificado y los antecedentes requeridos, ingresa a la plataforma oficial.</p>
+        <a class="btn btn-accent btn-lg" id="btnCtaDom" href="#" target="_blank">Acceder a DOM en Línea</a>
+        <div class="cta-tags">
+          <span>Rol de avalúo</span><span>Croquis</span><span>Documentos digitalizados</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer" id="contacto">
+    <div class="container footer-grid">
+      <div>
+        <h4>Dirección de Obras</h4>
+        <p id="footerMunicipalidad"></p>
+        <p id="footerDireccion"></p>
+        <p id="footerTelefono"></p>
+        <p id="footerEmail"></p>
+      </div>
+      <div>
+        <h4>Plataforma</h4>
+        <p>DOM en Línea MINVU</p>
+      </div>
+      <div>
+        <h4>Acceso</h4>
+        <p class="link-texto">Ingresar directamente aquí:
+          <a id="footerLinkDom" href="#" target="_blank">DOM en Línea</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+  <script src="chatbot.js"></script>
+
+  <!-- Aplicar URLs desde config tras cargar scripts -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const url = (window.DOM_CONFIG && window.DOM_CONFIG.urlDomEnLinea) || "https://domenlinea.minvu.cl/";
+      ["btnHeroDom","btnVideoDom","btnCtaDom","footerLinkDom"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.href = url;
+      });
+      const brandLink = document.getElementById("headerBrandLink");
+      if (brandLink && window.DOM_CONFIG && window.DOM_CONFIG.contacto) {
+        brandLink.href = window.DOM_CONFIG.contacto.urlSitioMunicipal || "#";
+      }
+    });
+  </script>
+
+</body>
+</html>
