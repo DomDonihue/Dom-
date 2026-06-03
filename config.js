@@ -202,7 +202,7 @@ window.DOM_CONFIG = {
 
   chatbot: {
     saludo:
-      "¡Hola! 👋 Soy el asistente virtual de la DOM de {municipalidad}.\n\n¿En qué puedo ayudarte hoy?",
+      "¡Hola! 👋 Soy DOM tu asistente virtual de {municipalidad}.\n\n¿En qué puedo ayudarte hoy?",
 
     mensajeContacto:
       "📞 **Contacto DOM de {municipalidad}**\n\n📍 **Dirección:** {direccion}\n☎️ **Teléfono:** {telefono}\n✉️ **Email:** {email}\n\n⏰ **Horarios:**\n{horario}\n\n💡 Los trámites en línea puedes iniciarlos las 24 horas.",
