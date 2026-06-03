@@ -390,7 +390,7 @@ function limpiarCalle(c) {
 }
 
 async function cargarPdfBaseCip() {
-  const rutas = cfg("rutasPdfCip",["./img/Doc/cip_base.pdf"]);
+  const rutas = cfg("rutasPdfCip",["./img/doc/cip_base.pdf"]);
   for (const ruta of rutas) {
     try {
       const r = await fetch(ruta);
