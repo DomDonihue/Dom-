@@ -1050,6 +1050,14 @@ img {
     min-height: auto;
     padding: 56px 0;
     background-position: 62% center;
+    background-image:
+      linear-gradient(
+        180deg,
+        rgba(15, 60, 104, 0.78) 0%,
+        rgba(15, 60, 104, 0.65) 50%,
+        rgba(15, 60, 104, 0.82) 100%
+      ),
+      url("img/hero.png");
   }
 
   .hero-left h1 {
@@ -1092,6 +1100,46 @@ img {
 
   #mapaPredio {
     height: 340px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 48px 0 40px;
+    background-position: center top;
+    background-image:
+      linear-gradient(
+        180deg,
+        rgba(15, 60, 104, 0.82) 0%,
+        rgba(15, 60, 104, 0.60) 45%,
+        rgba(15, 60, 104, 0.88) 100%
+      ),
+      url("img/hero.png");
+  }
+
+  .hero-right {
+    display: none;
+  }
+
+  .hero-left h1 {
+    font-size: 2.4rem;
+  }
+
+  .hero-left h2 {
+    font-size: 1.25rem;
+  }
+
+  .hero-left p {
+    font-size: 1rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    text-align: center;
   }
 }
 
