@@ -3,6 +3,8 @@
    NO editar. Toda la configuración está en config.js
    ================================================================ */
 (function () {
+  // Esperar a que el DOM esté completamente listo
+  function init() {
 
   function cfg(k, d) {
     return (window.DOM_CONFIG && window.DOM_CONFIG[k] !== undefined) ? window.DOM_CONFIG[k] : d;
@@ -261,5 +263,13 @@
 
   // badge de notificación después de 3 segundos
   setTimeout(() => { if (!abierto) burbuja.querySelector(".cb-badge").style.display = "block"; }, 3000);
+  } // fin init()
+
+  // Ejecutar cuando el DOM esté listo
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 
 })();

@@ -245,6 +245,13 @@ function actualizarUbicacionPredio(lat, lng, texto) {
     });
   }
   marcadorPredio.bindPopup("Ubicación seleccionada para el croquis").openPopup();
+
+  // Detectar zona urbana/rural con polígonos oficiales
+  const zonaOficial = detectarZonaOficial(lat, lng);
+  if (zonaOficial) {
+    mostrarIndicadorZona(lat, lng, zonaOficial);
+  }
+
   actualizarEstadoFlujo();
 }
 
@@ -372,6 +379,9 @@ document.addEventListener("DOMContentLoaded", function () {
    GENERACIÓN PDF
    ================================================================ */
 function obtenerValor(id) {
+  // Para radio buttons usar querySelector con :checked
+  const radios = document.querySelectorAll(`input[name="${id}"]:checked`);
+  if (radios.length > 0) return radios[0].value.trim();
   const el = document.getElementById(id);
   return el ? el.value.trim() : "";
 }
@@ -390,7 +400,7 @@ function limpiarCalle(c) {
 }
 
 async function cargarPdfBaseCip() {
-  const rutas = cfg("rutasPdfCip",["./img/doc/cip_base.pdf"]);
+  const rutas = cfg("rutasPdfCip",["./img/Doc/cip_base.pdf"]);
   for (const ruta of rutas) {
     try {
       const r = await fetch(ruta);
@@ -407,6 +417,24 @@ async function capturarMapaParaPdf() {
 }
 
 function cortarTexto(t,max) { return String(t||"").length>max ? String(t).substring(0,max) : String(t||""); }
+
+/* ================================================================
+   MAPA DE CHECKBOXES — posiciones en el formulario PDF
+   Coordenadas medidas con pdfplumber sobre formulario.pdf
+   ================================================================ */
+const CHECKBOXES_PDF = {
+  NUMERO:               { x: 56,  y: 759 },
+  RURALIDAD:            { x: 56,  y: 738 },
+  URBANIZACION:         { x: 56,  y: 719 },
+  AFECTACION:           { x: 56,  y: 698 },
+  OTROS:                { x: 56,  y: 677 },
+  INFORMACIONES_PREVIAS:{ x: 353, y: 758 },
+  VIVIENDA_SOCIAL:      { x: 353, y: 737 },
+  LOCALIZACION:         { x: 353, y: 718 },
+  ZONIFICACION:         { x: 353, y: 697 },
+  URBANO:               { x: 168, y: 652 },
+  RURAL:                { x: 266, y: 652 }
+};
 
 async function generarPdfCip(imprimir=false) {
   if (!validarFormularioCip()) return;
@@ -433,15 +461,26 @@ async function generarPdfCip(imprimir=false) {
       const val = upper ? String(texto||"").toUpperCase() : String(texto||"");
       escribirPos(val,pos);
     }
+    function marcarCheck(clave) {
+      const pos = CHECKBOXES_PDF[clave];
+      if (pos) escribir("X", pos.x, pos.y, 10, true);
+    }
 
     const muni = cfg("municipalidad","");
     const reg  = cfg("region","");
     const zona = obtenerValor("zona");
 
-    escribirPos(muni, cfgPdf("municipalidadSuperior",{x:270,y:820,size:9,bold:true,max:42}));
-    escribirPos(reg,  cfgPdf("regionSuperior",       {x:212,y:789,size:7,bold:false,max:60}));
-    if (zona==="urbano") { const p=cfgPdf("marcaUrbano",{x:209,y:754,size:13,bold:true}); escribir("X",p.x,p.y,p.size||13,true); }
-    if (zona==="rural")  { const p=cfgPdf("marcaRural", {x:307,y:754,size:13,bold:true}); escribir("X",p.x,p.y,p.size||13,true); }
+    // Municipalidad y región en encabezado
+    escribirPos(muni, cfgPdf("municipalidadSuperior",{x:220,y:893,size:9,bold:true,max:42}));
+    escribirPos(reg,  cfgPdf("regionSuperior",       {x:220,y:820,size:8,bold:false,max:60}));
+
+    // Tipo de certificado seleccionado
+    const tipoCert = obtenerValor("tipoCertificado");
+    if (tipoCert && CHECKBOXES_PDF[tipoCert]) marcarCheck(tipoCert);
+
+    // Urbano / Rural
+    if (zona==="urbano") marcarCheck("URBANO");
+    if (zona==="rural")  marcarCheck("RURAL");
 
     campo("nombre",  obtenerValor("nombre"),  {x:60, y:675,size:8,bold:false,max:55});
     campo("rut",     obtenerValor("rut"),     {x:338,y:675,size:8,bold:false,max:20});
@@ -537,3 +576,133 @@ function activarOpcionSinNumero() {
     else{if(inp.value.trim().toUpperCase()==="S/N")inp.value="";inp.readOnly=false;inp.focus();}
   });
 }
+
+/* ================================================================
+   DETECCIÓN DE ZONA URBANA/RURAL — usando polígonos oficiales
+   ================================================================ */
+
+/**
+ * Algoritmo Ray Casting — determina si un punto [lat,lng]
+ * está dentro de un polígono.
+ */
+function puntoEnPoligono(lat, lng, poligono) {
+  let dentro = false;
+  const n = poligono.length;
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const xi = poligono[i][1], yi = poligono[i][0];
+    const xj = poligono[j][1], yj = poligono[j][0];
+    const intersecta = ((yi > lat) !== (yj > lat)) &&
+      (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi);
+    if (intersecta) dentro = !dentro;
+  }
+  return dentro;
+}
+
+/**
+ * Detecta si las coordenadas caen en zona urbana o rural
+ * según los polígonos del Plan Regulador (zonas.js).
+ * Retorna: "urbano" | "rural"
+ */
+function detectarZonaOficial(lat, lng) {
+  if (!window.DOM_ZONAS || !window.DOM_ZONAS.zonasUrbanas) return null;
+
+  for (const zona of window.DOM_ZONAS.zonasUrbanas) {
+    if (zona.poligono && puntoEnPoligono(lat, lng, zona.poligono)) {
+      return "urbano";
+    }
+  }
+  return "rural";
+}
+
+/**
+ * Muestra un indicador visual en el mapa con la zona detectada
+ * y permite al usuario corregirla.
+ */
+function mostrarIndicadorZona(lat, lng, zonaDetectada) {
+  // Eliminar indicador anterior si existe
+  const anteriorPopup = document.getElementById("zonaIndicador");
+  if (anteriorPopup) anteriorPopup.remove();
+
+  const zonaSelect = document.getElementById("zona");
+  if (!zonaSelect) return;
+
+  // Asignar zona detectada
+  zonaSelect.value = zonaDetectada;
+
+  // Mostrar notificación visual sobre el mapa
+  const contenedorMapa = document.getElementById("mapaPredio");
+  if (!contenedorMapa) return;
+
+  const indicador = document.createElement("div");
+  indicador.id = "zonaIndicador";
+  indicador.style.cssText = `
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: ${zonaDetectada === "urbano" ? "#0f3c68" : "#2d6a4f"};
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  `;
+  indicador.innerHTML = `
+    <span>${zonaDetectada === "urbano" ? "🏙️ Zona Urbana detectada" : "🌿 Zona Rural detectada"}</span>
+    <span style="opacity:.7;font-weight:400;font-size:.78rem">¿No es correcto?</span>
+    <button onclick="corregirZona()" style="
+      background:rgba(255,255,255,.2);
+      border:1px solid rgba(255,255,255,.4);
+      color:#fff;
+      border-radius:10px;
+      padding:3px 10px;
+      font-size:.78rem;
+      font-weight:700;
+      cursor:pointer;
+    ">Cambiar</button>
+  `;
+
+  // Posicionar relativo al contenedor del mapa
+  contenedorMapa.style.position = "relative";
+  contenedorMapa.appendChild(indicador);
+
+  // Auto-ocultar después de 6 segundos
+  setTimeout(() => {
+    if (indicador.parentNode) {
+      indicador.style.opacity = "0";
+      indicador.style.transition = "opacity 0.5s";
+      setTimeout(() => indicador.remove(), 500);
+    }
+  }, 6000);
+}
+
+/**
+ * Permite al usuario corregir manualmente la zona
+ * mostrando el selector de forma destacada.
+ */
+window.corregirZona = function () {
+  const indicador = document.getElementById("zonaIndicador");
+  if (indicador) indicador.remove();
+
+  const zonaSelect = document.getElementById("zona");
+  if (!zonaSelect) return;
+
+  // Scroll al selector y destacarlo
+  zonaSelect.scrollIntoView({ behavior: "smooth", block: "center" });
+  zonaSelect.style.transition = "box-shadow 0.3s, border-color 0.3s";
+  zonaSelect.style.borderColor = "#2f76ea";
+  zonaSelect.style.boxShadow = "0 0 0 4px rgba(47,118,234,0.25)";
+
+  setTimeout(() => {
+    zonaSelect.style.borderColor = "";
+    zonaSelect.style.boxShadow = "";
+  }, 3000);
+
+  zonaSelect.focus();
+};

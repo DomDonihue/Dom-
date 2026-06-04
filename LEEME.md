@@ -50,16 +50,16 @@ En los textos de `chatbot:` puedes usar:
 ## Ejemplo: adaptar a San Fernando
 
 ```js
-municipalidad:      "DOÑIHUE",
-municipalidadCorta: "Doñihue",
+municipalidad:      "SAN FERNANDO",
+municipalidadCorta: "San Fernando",
 region:             "DEL LIBERTADOR GENERAL BERNARDO O'HIGGINS",
 centroMapa:         [-34.585, -70.987],
-comunaBusqueda:     "Doñihue",
+comunaBusqueda:     "San Fernando",
 contacto: {
-  direccion: "Av. estacion  #344",
+  direccion: "Manuel Rodríguez #950",
   telefono:  "72-2710200",
-  email:     "dom@mdonihue.cl.cl",
+  email:     "dom@sanfernando.cl",
   horario:   "Lunes a Viernes\n8:30 a 14:00 hrs",
-  urlSitioMunicipal: "https://www.mdonihue.cl/"
+  urlSitioMunicipal: "https://www.sanfernando.cl/"
 }
 ```
