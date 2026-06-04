@@ -397,7 +397,7 @@ function limpiarCalle(c) {
 }
 
 async function cargarPdfBaseCip() {
-  const rutas = cfg("rutasPdfCip",["./img/doc/formulario.pdf"]);
+  const rutas = cfg("rutasPdfCip",["./img/Doc/cip_base.pdf"]);
   for (const ruta of rutas) {
     try {
       const r = await fetch(ruta);
@@ -420,17 +420,17 @@ function cortarTexto(t,max) { return String(t||"").length>max ? String(t).substr
    Coordenadas medidas con pdfplumber sobre formulario.pdf
    ================================================================ */
 const CHECKBOXES_PDF = {
-  NUMERO:               { x: 56,  y: 759 },
-  RURALIDAD:            { x: 56,  y: 738 },
-  URBANIZACION:         { x: 56,  y: 719 },
-  AFECTACION:           { x: 56,  y: 698 },
-  OTROS:                { x: 56,  y: 677 },
-  INFORMACIONES_PREVIAS:{ x: 353, y: 758 },
-  VIVIENDA_SOCIAL:      { x: 353, y: 737 },
-  LOCALIZACION:         { x: 353, y: 718 },
-  ZONIFICACION:         { x: 353, y: 697 },
-  URBANO:               { x: 168, y: 652 },
-  RURAL:                { x: 266, y: 652 }
+  NUMERO:               { x: 52,  y: 757 },
+  RURALIDAD:            { x: 52,  y: 736 },
+  URBANIZACION:         { x: 52,  y: 717 },
+  AFECTACION:           { x: 52,  y: 696 },
+  OTROS:                { x: 52,  y: 675 },
+  INFORMACIONES_PREVIAS:{ x: 350, y: 756 },
+  VIVIENDA_SOCIAL:      { x: 350, y: 735 },
+  LOCALIZACION:         { x: 350, y: 716 },
+  ZONIFICACION:         { x: 350, y: 695 },
+  URBANO:               { x: 168, y: 650 },
+  RURAL:                { x: 266, y: 650 }
 };
 
 async function generarPdfCip(imprimir=false) {
@@ -475,9 +475,17 @@ async function generarPdfCip(imprimir=false) {
     const tipoCert = obtenerValor("tipoCertificado");
     if (tipoCert && CHECKBOXES_PDF[tipoCert]) marcarCheck(tipoCert);
 
-    // Urbano / Rural
-    if (zona==="urbano") marcarCheck("URBANO");
-    if (zona==="rural")  marcarCheck("RURAL");
+    // Urbano / Rural — usa config.js si tiene posiciones, si no usa CHECKBOXES_PDF
+    if (zona==="urbano") {
+      const p = cfgPdf("marcaUrbano", null);
+      if (p) escribir("X", p.x, p.y, p.size||13, true);
+      else marcarCheck("URBANO");
+    }
+    if (zona==="rural") {
+      const p = cfgPdf("marcaRural", null);
+      if (p) escribir("X", p.x, p.y, p.size||13, true);
+      else marcarCheck("RURAL");
+    }
 
     campo("nombre",  obtenerValor("nombre"),  {x:60, y:675,size:8,bold:false,max:55});
     campo("rut",     obtenerValor("rut"),     {x:338,y:675,size:8,bold:false,max:20});

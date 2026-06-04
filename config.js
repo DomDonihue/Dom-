@@ -252,8 +252,8 @@ window.DOM_CONFIG = {
   posicionesPdf: {
     municipalidadSuperior:    { x: 270, y: 850, size: 9, bold: true,  max: 42 },
     regionSuperior:           { x: 212, y: 820, size: 7, bold: false, max: 60 },
-    marcaUrbano:              { x: 240, y: 745, size: 13, bold: true, max: 1  },
-    marcaRural:               { x: 380, y: 745, size: 13, bold: true, max: 1  },
+    marcaUrbano:              { x: 195, y: 645, size: 13, bold: true, max: 1  },
+    marcaRural:               { x: 292, y: 645, size: 13, bold: true, max: 1  },
 
     nombre:                   { x: 60,  y: 600, size: 8, bold: false, max: 55 },
     rut:                      { x: 338, y: 600, size: 8, bold: false, max: 20 },
