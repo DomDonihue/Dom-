@@ -250,32 +250,32 @@ window.DOM_CONFIG = {
     Subir: +Y  |  Bajar: -Y  |  Derecha: +X  |  Izquierda: -X
   */
   posicionesPdf: {
-    municipalidadSuperior:    { x: 270, y: 820, size: 9, bold: true,  max: 42 },
-    regionSuperior:           { x: 212, y: 789, size: 7, bold: false, max: 60 },
-    marcaUrbano:              { x: 209, y: 754, size: 13, bold: true, max: 1  },
-    marcaRural:               { x: 307, y: 754, size: 13, bold: true, max: 1  },
+    municipalidadSuperior:    { x: 270, y: 850, size: 9, bold: true,  max: 42 },
+    regionSuperior:           { x: 212, y: 820, size: 7, bold: false, max: 60 },
+    marcaUrbano:              { x: 240, y: 745, size: 13, bold: true, max: 1  },
+    marcaRural:               { x: 380, y: 745, size: 13, bold: true, max: 1  },
 
-    nombre:                   { x: 60,  y: 675, size: 8, bold: false, max: 55 },
-    rut:                      { x: 338, y: 675, size: 8, bold: false, max: 20 },
-    email:                    { x: 60,  y: 655, size: 8, bold: false, max: 35 },
-    telefono:                 { x: 238, y: 655, size: 8, bold: false, max: 18 },
+    nombre:                   { x: 60,  y: 600, size: 8, bold: false, max: 55 },
+    rut:                      { x: 338, y: 600, size: 8, bold: false, max: 20 },
+    email:                    { x: 60,  y: 575, size: 8, bold: false, max: 35 },
+    telefono:                 { x: 238, y: 575, size: 8, bold: false, max: 18 },
 
-    calle:                    { x: 60,  y: 620, size: 8, bold: false, max: 55 },
-    numero:                   { x: 356, y: 620, size: 8, bold: false, max: 12 },
-    depto:                    { x: 432, y: 620, size: 8, bold: false, max: 12 },
-    block:                    { x: 512, y: 620, size: 8, bold: false, max: 12 },
-    manzana:                  { x: 60,  y: 595, size: 8, bold: false, max: 12 },
-    lote:                     { x: 120, y: 595, size: 8, bold: false, max: 12 },
-    localidad:                { x: 180, y: 595, size: 8, bold: false, max: 35 },
-    planoLoteo:               { x: 412, y: 595, size: 8, bold: false, max: 18 },
-    rolSii:                   { x: 512, y: 595, size: 8, bold: false, max: 18 },
+    calle:                    { x: 60,  y: 540, size: 8, bold: false, max: 55 },
+    numero:                   { x: 356, y: 540, size: 8, bold: false, max: 12 },
+    depto:                    { x: 420, y: 540, size: 8, bold: false, max: 12 },
+    block:                    { x: 495, y: 540, size: 8, bold: false, max: 12 },
+    manzana:                  { x: 35,  y: 515, size: 8, bold: false, max: 12 },
+    lote:                     { x: 90, y: 515, size: 8, bold: false, max: 12 },
+    localidad:                { x: 180, y: 515, size: 8, bold: false, max: 35 },
+    planoLoteo:               { x: 412, y: 515, size: 8, bold: false, max: 18 },
+    rolSii:                   { x: 512, y: 515, size: 8, bold: false, max: 18 },
 
-    mapa:                     { x: 55,  y: 305, width: 529, height: 259 },
-    coordenadas:              { x: 65,  y: 312, size: 8, bold: true,  max: 80 },
+    mapa:                     { x: 36,  y: 240, width: 522, height: 245 },
+    coordenadas:              { x: 35,  y: 250, size: 8, bold: true,  max: 80 },
 
-    municipalidadComprobante: { x: 255, y: 190, size: 9, bold: true,  max: 35 },
-    calleComprobante:         { x: 60,  y: 116, size: 8, bold: false, max: 65 },
-    numeroComprobante:        { x: 500, y: 116, size: 8, bold: false, max: 15 }
+    municipalidadComprobante: { x: 256, y: 155, size: 9, bold: true,  max: 35 },
+    calleComprobante:         { x: 200,  y: 50, size: 8, bold: false, max: 65 },
+    numeroComprobante:        { x: 500, y: 50, size: 8, bold: false, max: 15 }
   }
 
 }; /* fin window.DOM_CONFIG */
