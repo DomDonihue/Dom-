@@ -44,8 +44,7 @@
       certificados: {
         mensaje: "Estos son los certificados disponibles. ¿Sobre cuál quieres saber más?",
         opciones: [
-          ...certs.map((c, i) => ({ texto: `📄 ${c.nombre}`, siguiente: `cert_${i}` })),
-          { texto: "← Volver al inicio", siguiente: "inicio" }
+          ...certs.map((c, i) => ({ texto: `📄 ${c.nombre}`, siguiente: `cert_${i}` }))
         ]
       },
 
@@ -54,8 +53,7 @@
         opciones: [
           { texto: "🗺️ Ir al asistente de solicitud", accion: "scroll_a", id: "preparar-solicitud" },
           { texto: "❓ ¿Qué necesito tener listo?",   siguiente: "que_necesito" },
-          { texto: "🌐 Ir directamente a DOM en Línea", accion: "abrir_url", url: urlDom },
-          { texto: "← Volver al inicio",              siguiente: "inicio" }
+          { texto: "🌐 Ir directamente a DOM en Línea", accion: "abrir_url", url: urlDom }
         ]
       },
 
@@ -63,8 +61,7 @@
         mensaje: reemplazar(cbCfg.mensajeQueNecesito || "✅ **¿Qué necesito tener listo?**\n\n• Rol de avalúo\n• Dirección exacta\n• Croquis o ubicación en mapa\n• Dominio Vigente\n• Copia de escritura\n• ClaveÚnica\n• Documentos digitalizados"),
         opciones: [
           { texto: "🔑 Recuperar ClaveÚnica", accion: "abrir_url", url: "https://claveunica.gob.cl/recuperar" },
-          { texto: "🗺️ Preparar solicitud ahora", accion: "scroll_a", id: "preparar-solicitud" },
-          { texto: "← Volver al inicio", siguiente: "inicio" }
+          { texto: "🗺️ Preparar solicitud ahora", accion: "scroll_a", id: "preparar-solicitud" }
         ]
       },
 
@@ -73,8 +70,7 @@
           certs.map(c => `• **${c.nombre}:** ${c.plazo}`).join("\n"),
         opciones: [
           { texto: "📞 Consultar mi trámite",  siguiente: "contacto" },
-          { texto: "🌐 Ver en DOM en Línea",    accion: "abrir_url", url: urlDom },
-          { texto: "← Volver al inicio",        siguiente: "inicio" }
+          { texto: "🌐 Ver en DOM en Línea",    accion: "abrir_url", url: urlDom }
         ]
       },
 
@@ -82,16 +78,14 @@
         mensaje: "📋 **Documentos generalmente requeridos**\n\n• **Rol de avalúo** — Número SII del predio\n• **Croquis de ubicación** — Boceto del predio\n• **Dominio Vigente** — Conservador de Bienes Raíces\n• **Copia Escritura** — Del inmueble\n\nAlgunos certificados pueden pedir documentos adicionales.",
         opciones: [
           { texto: "📄 Ver documentos por certificado", siguiente: "certificados" },
-          { texto: "📝 Preparar solicitud CIP",         siguiente: "preparar_solicitud" },
-          { texto: "← Volver al inicio",                siguiente: "inicio" }
+          { texto: "📝 Preparar solicitud CIP",         siguiente: "preparar_solicitud" }
         ]
       },
 
       contacto: {
         mensaje: reemplazar(cbCfg.mensajeContacto || "📞 **Contacto DOM de {municipalidad}**\n\n📍 {direccion}\n☎️ {telefono}\n✉️ {email}\n\n⏰ **Horarios:**\n{horario}"),
         opciones: [
-          { texto: "🌐 Ir a DOM en Línea", accion: "abrir_url", url: urlDom },
-          { texto: "← Volver al inicio",   siguiente: "inicio" }
+          { texto: "🌐 Ir a DOM en Línea", accion: "abrir_url", url: urlDom }
         ]
       }
     };
@@ -102,8 +96,7 @@
         mensaje: `📄 **${c.nombre}**\n\n${c.descripcion}\n\n**Plazo:** ${c.plazo}\n\n**Documentos requeridos:**\n${c.documentos.map(d => `• ${d}`).join("\n")}`,
         opciones: [
           { texto: "🌐 Ir a DOM en Línea",    accion: "abrir_url", url: urlDom },
-          { texto: "← Ver otros certificados", siguiente: "certificados" },
-          { texto: "🏠 Volver al inicio",       siguiente: "inicio" }
+          { texto: "← Ver otros certificados", siguiente: "certificados" }
         ]
       };
     });
@@ -142,6 +135,8 @@
     .cb-typing span:nth-child(3){animation-delay:.4s}
     @keyframes cbDot{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
     @media(max-width:420px){#cb-ventana{right:12px;bottom:96px;width:calc(100vw - 24px)}#cb-burbuja{right:16px;bottom:20px}}
+    .cb-btn-home{border-color:#e2e8f0;color:#64748b;font-weight:600;margin-top:4px;border-style:dashed}
+    .cb-btn-home:hover{background:#f8fafc;border-color:#94a3b8;color:#334155;transform:none}
   `;
 
   const st = document.createElement("style");
@@ -216,6 +211,15 @@
       b.addEventListener("click", () => handleOpcion(op));
       c.appendChild(b);
     });
+
+    // Botón fijo de inicio — siempre visible excepto en la pantalla de inicio
+    if (nodoActual !== "inicio") {
+      const btnHome = document.createElement("button");
+      btnHome.className = "cb-btn cb-btn-home";
+      btnHome.textContent = "🏠 Volver al inicio";
+      btnHome.addEventListener("click", () => mostrarNodo("inicio", "🏠 Volver al inicio"));
+      c.appendChild(btnHome);
+    }
   }
 
   function mostrarNodo(id, textoUsuario = null) {
@@ -232,14 +236,30 @@
     }, textoUsuario ? 650 : 380);
   }
 
+  function resetConversacion() {
+    document.getElementById("cb-mensajes").innerHTML = "";
+    document.getElementById("cb-opciones").innerHTML = "";
+    nodoActual = "inicio";
+  }
+
+  function volverAlInicio() {
+    const typing = showTyping();
+    setTimeout(() => {
+      typing.remove();
+      addMsg("¿Puedo ayudarte en algo más?", true);
+      nodoActual = "inicio";
+      const nodoInicio = FLUJO["inicio"];
+      if (nodoInicio) showOpciones(nodoInicio.opciones);
+    }, 650);
+  }
+
   function handleOpcion(op) {
     if (op.accion === "abrir_url") {
       addMsg(op.texto, false);
       document.getElementById("cb-opciones").innerHTML = "";
       setTimeout(() => {
         window.open(op.url, "_blank");
-        const n = FLUJO[nodoActual];
-        if (n) showOpciones(n.opciones);
+        volverAlInicio();
       }, 300);
       return;
     }
@@ -250,6 +270,7 @@
       if (el) {
         setTimeout(() => {
           toggle();
+          resetConversacion();
           setTimeout(() => el.scrollIntoView({ behavior:"smooth", block:"start" }), 200);
         }, 300);
       }
@@ -259,7 +280,11 @@
   }
 
   burbuja.addEventListener("click", toggle);
-  document.getElementById("cb-cerrar").addEventListener("click", () => { abierto = true; toggle(); });
+  document.getElementById("cb-cerrar").addEventListener("click", () => {
+    abierto = true;
+    toggle();
+    setTimeout(resetConversacion, 300);
+  });
 
   // badge de notificación después de 3 segundos
   setTimeout(() => { if (!abierto) burbuja.querySelector(".cb-badge").style.display = "block"; }, 3000);

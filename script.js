@@ -104,6 +104,8 @@ document.addEventListener("DOMContentLoaded", function () {
   /* rut */
   activarValidacionRut();
   activarOpcionSinNumero();
+  activarValidacionTelefono();
+  activarValidacionNumero();
 });
 
 function setText(id, valor) {
@@ -562,13 +564,42 @@ function activarValidacionRut() {
   inp.addEventListener("blur",mostrarEstadoRut);
 }
 
+function activarValidacionTelefono() {
+  const inp = document.getElementById("telefono"); if (!inp) return;
+  inp.setAttribute("maxlength", "9");
+  inp.setAttribute("inputmode", "numeric");
+  let msg = document.getElementById("telefonoMensaje");
+  if (!msg) { msg = document.createElement("small"); msg.id = "telefonoMensaje"; msg.style.cssText = "display:block;margin-top:6px;font-weight:700"; inp.insertAdjacentElement("afterend", msg); }
+  inp.addEventListener("input", function () {
+    this.value = this.value.replace(/\D/g, "").slice(0, 9);
+    msg.textContent = ""; inp.style.borderColor = ""; inp.setCustomValidity("");
+  });
+  inp.addEventListener("blur", function () {
+    const v = this.value.trim();
+    if (!v) { inp.style.borderColor = ""; msg.textContent = ""; inp.setCustomValidity(""); return; }
+    if (v.length !== 9) { inp.style.borderColor = "#dc2626"; msg.style.color = "#b91c1c"; msg.textContent = "El teléfono debe tener exactamente 9 dígitos."; inp.setCustomValidity("Teléfono inválido."); }
+    else { inp.style.borderColor = "#16a34a"; msg.style.color = "#0f6b45"; msg.textContent = "Teléfono válido."; inp.setCustomValidity(""); }
+  });
+}
+
+function activarValidacionNumero() {
+  const inp = document.getElementById("numero"); if (!inp) return;
+  inp.setAttribute("inputmode", "numeric");
+  inp.addEventListener("input", function () {
+    if (this.readOnly) return;
+    this.value = this.value.replace(/\D/g, "");
+  });
+}
+
 function validarFormularioCip() {
   const rutInput=document.getElementById("rut"); const checkSN=document.getElementById("sinNumero"); const numInput=document.getElementById("numero");
   if(rutInput) rutInput.value=formatearRut(rutInput.value);
   if(checkSN&&checkSN.checked&&numInput) numInput.value="S/N";
   const nombre=obtenerValor("nombre"),rut=obtenerValor("rut"),calle=obtenerValor("calle"),numero=obtenerValor("numero"),rolSii=obtenerValor("rolSii"),lat=obtenerValor("latitud"),lng=obtenerValor("longitud"),sinNum=checkSN?checkSN.checked:false;
+  const telefono=obtenerValor("telefono");
   if(!nombre||!rut||!calle||(!numero&&!sinNum)||!rolSii){alert("Debe completar nombre, RUT, calle, número y Rol SII.");return false;}
   if(!validarRutChileno(rut)){alert("RUT inválido.");if(rutInput){mostrarEstadoRut();rutInput.focus();}return false;}
+  if(telefono && (!/^\d+$/.test(telefono)||telefono.length!==9)){alert("El teléfono debe tener exactamente 9 dígitos numéricos.");document.getElementById("telefono").focus();return false;}
   if(!lat||!lng){alert("Debe seleccionar una ubicación en el mapa.");return false;}
   return true;
 }
