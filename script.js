@@ -379,9 +379,6 @@ document.addEventListener("DOMContentLoaded", function () {
    GENERACIÓN PDF
    ================================================================ */
 function obtenerValor(id) {
-  // Para radio buttons usar querySelector con :checked
-  const radios = document.querySelectorAll(`input[name="${id}"]:checked`);
-  if (radios.length > 0) return radios[0].value.trim();
   const el = document.getElementById(id);
   return el ? el.value.trim() : "";
 }
@@ -400,7 +397,7 @@ function limpiarCalle(c) {
 }
 
 async function cargarPdfBaseCip() {
-  const rutas = cfg("rutasPdfCip",["./img/doc/formulario.pdf"]);
+  const rutas = cfg("rutasPdfCip",["./img/Doc/cip_base.pdf"]);
   for (const ruta of rutas) {
     try {
       const r = await fetch(ruta);

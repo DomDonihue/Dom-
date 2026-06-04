@@ -158,43 +158,19 @@
           </div>
           <h3>Tipo de certificado</h3>
           <p class="form-help">Seleccione el certificado que necesita solicitar.</p>
-          <div class="tipo-cert-grid">
-            <label class="tipo-cert-opcion">
-              <input type="radio" name="tipoCertificado" id="tipoCertificado" value="INFORMACIONES_PREVIAS" checked>
-              <span>📋 Informaciones Previas</span>
-            </label>
-            <label class="tipo-cert-opcion">
-              <input type="radio" name="tipoCertificado" value="NUMERO">
-              <span>📍 Número</span>
-            </label>
-            <label class="tipo-cert-opcion">
-              <input type="radio" name="tipoCertificado" value="ZONIFICACION">
-              <span>📐 Zonificación</span>
-            </label>
-            <label class="tipo-cert-opcion">
-              <input type="radio" name="tipoCertificado" value="AFECTACION">
-              <span>🔒 Afectación Utilidad Pública</span>
-            </label>
-            <label class="tipo-cert-opcion">
-              <input type="radio" name="tipoCertificado" value="VIVIENDA_SOCIAL">
-              <span>🏠 Vivienda Social</span>
-            </label>
-            <label class="tipo-cert-opcion">
-              <input type="radio" name="tipoCertificado" value="LOCALIZACION">
-              <span>🗺️ Localización</span>
-            </label>
-            <label class="tipo-cert-opcion">
-              <input type="radio" name="tipoCertificado" value="RURALIDAD">
-              <span>🌿 Ruralidad</span>
-            </label>
-            <label class="tipo-cert-opcion">
-              <input type="radio" name="tipoCertificado" value="URBANIZACION">
-              <span>🏗️ Urbanización</span>
-            </label>
-            <label class="tipo-cert-opcion">
-              <input type="radio" name="tipoCertificado" value="OTROS">
-              <span>📄 Otros</span>
-            </label>
+          <div class="form-group" style="margin-bottom:22px">
+            <label>Tipo de certificado</label>
+            <select id="tipoCertificado" name="tipoCertificado">
+              <option value="INFORMACIONES_PREVIAS">Informaciones Previas</option>
+              <option value="NUMERO">Número</option>
+              <option value="ZONIFICACION">Zonificación</option>
+              <option value="AFECTACION">Afectación a Utilidad Pública</option>
+              <option value="VIVIENDA_SOCIAL">Vivienda Social</option>
+              <option value="LOCALIZACION">Localización</option>
+              <option value="RURALIDAD">Ruralidad</option>
+              <option value="URBANIZACION">Urbanización</option>
+              <option value="OTROS">Otros</option>
+            </select>
           </div>
 
           <h3>Datos de la propiedad</h3>
