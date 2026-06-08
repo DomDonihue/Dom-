@@ -330,9 +330,11 @@ function actualizarPaso(id, estado) {
 }
 function actualizarEstadoFlujo() {
   const hay = hayUbicacionSeleccionada();
+  const chk = document.getElementById("checkConsentimiento");
+  const ok  = hay && (!chk || chk.checked);
   ["btnGuardarDatos","btnGenerarPdf","btnImprimirPdf"].forEach(id => {
     const b = document.getElementById(id);
-    if (b) b.disabled = !hay;
+    if (b) b.disabled = !ok;
   });
   const est = document.getElementById("estadoUbicacion");
   if (est) {
@@ -375,6 +377,22 @@ document.addEventListener("DOMContentLoaded", function () {
   if (btnPdf) btnPdf.addEventListener("click", () => generarPdfCip(false));
   const btnImp = document.getElementById("btnImprimirPdf");
   if (btnImp) btnImp.addEventListener("click", () => generarPdfCip(true));
+
+  /* ── checkbox consentimiento: renderizar texto desde config ── */
+  const spanConsent = document.getElementById("textoConsentimientoSpan");
+  if (spanConsent && window.DOM_CONFIG && window.DOM_CONFIG.consentimiento) {
+    const c   = window.DOM_CONFIG.consentimiento;
+    const mun = window.DOM_CONFIG.municipalidadCorta || window.DOM_CONFIG.municipalidad || "";
+    const txt = (c.textoConsentimiento || "").replace("{municipalidad}", mun);
+    if (c.urlPoliticaPrivacidad && c.textoEnlace) {
+      spanConsent.innerHTML = txt + ' <a href="' + c.urlPoliticaPrivacidad + '" target="_blank" rel="noopener">' + c.textoEnlace + '</a>.';
+    } else {
+      spanConsent.textContent = txt + ".";
+    }
+  }
+
+  const chkConsent = document.getElementById("checkConsentimiento");
+  if (chkConsent) chkConsent.addEventListener("change", actualizarEstadoFlujo);
 });
 
 /* ================================================================

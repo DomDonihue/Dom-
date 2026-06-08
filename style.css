@@ -661,6 +661,35 @@ img {
   color: var(--muted);
 }
 
+.consentimiento-bloque {
+  margin-top: 18px;
+  padding: 12px 16px;
+  background: #eef4ff;
+  border: 1px solid #b6d0f7;
+  border-radius: 8px;
+}
+.consentimiento-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.875rem;
+  color: #1e3a5f;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.consentimiento-label input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary, #2563eb);
+  cursor: pointer;
+}
+.consentimiento-label a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
 .form-actions {
   margin-top: 10px;
 }

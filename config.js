@@ -220,6 +220,27 @@ window.DOM_CONFIG = {
 
 
   /* ============================================================
+     9b. CONSENTIMIENTO DE DATOS PERSONALES
+     --------------------------------------------------------------
+     Aparece como checkbox obligatorio antes de poder validar
+     o descargar el formulario. Personalice el texto y el link.
+
+     textoConsentimiento : Frase que acompaña al checkbox.
+       Use {municipalidad} para insertar municipalidadCorta.
+     urlPoliticaPrivacidad: URL al texto completo de la ley o
+       política de privacidad del municipio. Dejar "" para no
+       mostrar el enlace.
+     textoEnlace: Texto visible del enlace.
+     ============================================================ */
+
+  consentimiento: {
+    textoConsentimiento:  "Autorizo a la Ilustre Municipalidad de {municipalidad} a tratar mis datos personales, incluido mi RUT, para la gestión de esta solicitud, conforme a la",
+    textoEnlace:          "Ley N° 19.628 sobre Protección de la Vida Privada",
+    urlPoliticaPrivacidad:"https://www.bcn.cl/leychile/navegar?idNorma=141599"
+  },
+
+
+  /* ============================================================
      10. MAPA (Leaflet + Nominatim)
      ============================================================ */
 
