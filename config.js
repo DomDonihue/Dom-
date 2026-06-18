@@ -128,6 +128,18 @@ window.DOM_CONFIG = {
 
   faq: [
     {
+      pregunta:  "¿Qué es DOM en Línea?",
+      respuesta: "Es la plataforma digital de la Dirección de Obras Municipales que permite a vecinos y contribuyentes gestionar certificados y trámites de manera rápida, segura y sin necesidad de acudir presencialmente a la oficina."
+    },
+    {
+      pregunta:  "¿Para qué sirve DOM en Línea?",
+      respuesta: "Permite orientar a los usuarios sobre los requisitos de cada trámite, agilizar procesos y facilitar la solicitud de certificados municipales como Informaciones Previas, Número, Zonificación, Afectación y más."
+    },
+    {
+      pregunta:  "¿Cómo se usa DOM en Línea?",
+      respuesta: "Selecciona el certificado que necesitas, revisa los documentos requeridos, prepara tus antecedentes con el asistente de mapa e ingresa tu solicitud en la plataforma oficial domenlinea.minvu.cl con tu ClaveÚnica."
+    },
+    {
       pregunta:  "¿Qué necesito para solicitar un certificado?",
       respuesta: "Normalmente se solicita rol de avalúo, dirección del predio, croquis de ubicación, Dominio Vigente, Copia Escritura y otros antecedentes según el certificado."
     },
@@ -208,7 +220,16 @@ window.DOM_CONFIG = {
       "📞 **Contacto DOM de {municipalidad}**\n\n📍 **Dirección:** {direccion}\n☎️ **Teléfono:** {telefono}\n✉️ **Email:** {email}\n\n⏰ **Horarios:**\n{horario}\n\n💡 Los trámites en línea puedes iniciarlos las 24 horas.",
 
     mensajeQueNecesito:
-      "✅ **¿Qué necesito tener listo?**\n\n• Rol de avalúo (número SII del predio)\n• Dirección exacta\n• Croquis o ubicación en mapa\n• Dominio Vigente (Conservador de Bienes Raíces)\n• Copia de escritura\n• ClaveÚnica\n• Documentos digitalizados (PDF o imagen)\n\n💡 Si no recuerdas el Rol SII, búscalo en el sitio del SII con el RUT del propietario."
+      "✅ **¿Qué necesito tener listo?**\n\n• Rol de avalúo (número SII del predio)\n• Dirección exacta\n• Croquis o ubicación en mapa\n• Dominio Vigente (Conservador de Bienes Raíces)\n• Copia de escritura\n• ClaveÚnica\n• Documentos digitalizados (PDF o imagen)\n\n💡 Si no recuerdas el Rol SII, búscalo en el sitio del SII con el RUT del propietario.",
+
+    mensajeQueEsDom:
+      "🏛️ **¿Qué es DOM en Línea?**\n\nEs la plataforma digital de la Dirección de Obras Municipales de {municipalidad} que permite a vecinos y contribuyentes gestionar certificados y trámites de manera rápida y segura, sin necesidad de acudir presencialmente a la oficina.",
+
+    mensajeParaQueSirve:
+      "⚙️ **¿Para qué sirve DOM en Línea?**\n\nPermite orientar a los usuarios sobre los requisitos de cada trámite y facilitar la solicitud de certificados municipales:\n\n• 📍 Ubicar tu predio en el mapa interactivo\n• 📋 Conocer los documentos requeridos\n• 📄 Generar formularios PDF prellenados\n• 🌐 Ingresar tu solicitud en la plataforma oficial",
+
+    mensajeComoLoUso:
+      "🖱️ **¿Cómo se usa DOM en Línea?**\n\n1️⃣ Selecciona el certificado que necesitas\n2️⃣ Revisa los documentos requeridos\n3️⃣ Ubica tu predio en el mapa interactivo\n4️⃣ Completa tus datos y descarga el formulario PDF\n5️⃣ Ingresa a domenlinea.minvu.cl con tu ClaveÚnica"
   },
 
 
@@ -223,20 +244,32 @@ window.DOM_CONFIG = {
      9b. CONSENTIMIENTO DE DATOS PERSONALES
      --------------------------------------------------------------
      Aparece como checkbox obligatorio antes de poder validar
-     o descargar el formulario. Personalice el texto y el link.
+     o descargar el formulario. Personalice el texto y los links.
 
-     textoConsentimiento : Frase que acompaña al checkbox.
+     textoConsentimiento : Frase introductoria del checkbox.
        Use {municipalidad} para insertar municipalidadCorta.
-     urlPoliticaPrivacidad: URL al texto completo de la ley o
-       política de privacidad del municipio. Dejar "" para no
-       mostrar el enlace.
-     textoEnlace: Texto visible del enlace.
+       Debe terminar sin punto; las leyes se añaden automáticamente.
+     leyes : Array de referencias legales que se muestran como
+       enlaces al final del texto. Puede poner una o varias.
+       Cada entrada: { texto: "Ley N° …", url: "https://…" }
+       Dejar url: "" para mostrar el texto sin enlace.
      ============================================================ */
 
   consentimiento: {
-    textoConsentimiento:  "Autorizo a la Ilustre Municipalidad de {municipalidad} a tratar mis datos personales, incluido mi RUT, para la gestión de esta solicitud, conforme a la",
-    textoEnlace:          "Ley N° 19.628 sobre Protección de la Vida Privada",
-    urlPoliticaPrivacidad:"https://www.bcn.cl/leychile/navegar?idNorma=141599"
+    requerido:           true,   // false → salta el checkbox (municipios sin requerimiento)
+    textoConsentimiento: "Autorizo a la Ilustre Municipalidad de {municipalidad} a tratar mis datos personales, incluido mi RUT, para la gestión de esta solicitud, conforme a la",
+    leyes: [
+      {
+        texto: "Ley N° 19.628 sobre Protección de la Vida Privada",
+        url:   "https://www.bcn.cl/leychile/navegar?idNorma=141599"
+      },
+      {
+        texto: "Ley N° 21.719 sobre Protección de Datos Personales",
+        url:   "https://www.bcn.cl/leychile/navegar?idNorma=1197098"
+      }
+    ],
+    registrarEnPdf:      true,   // imprime fecha/hora de aceptación en el PDF generado
+    avisoPreparacion:    "DOCUMENTO DE PREPARACIÓN — No válido como solicitud oficial. Debe ingresar en domenlinea.minvu.cl"
   },
 
 

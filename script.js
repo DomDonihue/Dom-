@@ -197,9 +197,11 @@ function construirRecursos() {
 }
 
 /* ================================================================
-   MAPA — Leaflet
+   MAPA — Leaflet + Leaflet.draw
    ================================================================ */
 let mapaPredio, marcadorPredio;
+let drawnItems, drawControl;
+let miniMapa = null, miniMapaLayer = null;
 
 function iniciarMapaPredio() {
   const contenedor = document.getElementById("mapaPredio");
@@ -208,22 +210,186 @@ function iniciarMapaPredio() {
   const centro = cfg("centroMapa", [-34.233333, -70.966667]);
   const zoom   = cfg("zoomInicial", 14);
 
-  mapaPredio = L.map("mapaPredio").setView(centro, zoom);
+  mapaPredio = L.map("mapaPredio", { zoomControl: true }).setView(centro, zoom);
 
-  const mapaNormal = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 });
-  const satelite   = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19 });
-  const etiquetas  = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, opacity: 0.7 });
-  const grupoSat   = L.layerGroup([satelite, etiquetas]);
+  /* Satélite Google (mejor resolución para Chile) */
+  L.tileLayer("https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", {
+    subdomains: ["0","1","2","3"], maxNativeZoom: 21, maxZoom: 21,
+    attribution: "Tiles &copy; Google"
+  }).addTo(mapaPredio);
 
-  grupoSat.addTo(mapaPredio);
-  L.control.layers({ "Calles": mapaNormal, "Satélite": grupoSat }).addTo(mapaPredio);
+  /* Traducciones Leaflet.draw al español */
+  L.drawLocal.draw.toolbar.buttons.polygon   = "Trazar polígono del predio";
+  L.drawLocal.draw.toolbar.buttons.rectangle = "Trazar rectángulo del predio";
+  L.drawLocal.draw.toolbar.actions.title     = "Cancelar trazado";
+  L.drawLocal.draw.toolbar.actions.text      = "Cancelar";
+  L.drawLocal.draw.toolbar.finish.title      = "Finalizar trazado";
+  L.drawLocal.draw.toolbar.finish.text       = "Finalizar";
+  L.drawLocal.draw.toolbar.undo.title        = "Eliminar último punto";
+  L.drawLocal.draw.toolbar.undo.text         = "Deshacer";
+  L.drawLocal.draw.handlers.polygon.tooltip  = { start:"Haga clic para comenzar", cont:"Haga clic para continuar", end:"Cierre el polígono en el primer punto" };
+  L.drawLocal.draw.handlers.rectangle.tooltip = { start:"Haga clic y arrastre para trazar el rectángulo" };
+  L.drawLocal.edit.toolbar.buttons.edit           = "Editar límites";
+  L.drawLocal.edit.toolbar.buttons.editDisabled   = "Sin límites para editar";
+  L.drawLocal.edit.toolbar.buttons.remove         = "Eliminar límites";
+  L.drawLocal.edit.toolbar.buttons.removeDisabled = "Sin límites para eliminar";
+  L.drawLocal.edit.toolbar.actions.save.text      = "Guardar";
+  L.drawLocal.edit.toolbar.actions.cancel.text    = "Cancelar";
+  L.drawLocal.edit.toolbar.actions.clearAll.text  = "Eliminar todo";
+  L.drawLocal.edit.handlers.edit.tooltip = { text:"Arrastre los vértices para editar", subtext:"Haga clic en Cancelar para deshacer" };
+  L.drawLocal.edit.handlers.remove.tooltip = { text:"Haga clic en el trazado para eliminarlo" };
 
+  /* Capa para polígonos dibujados */
+  drawnItems = new L.FeatureGroup();
+  mapaPredio.addLayer(drawnItems);
+
+  /* Control de dibujo */
+  drawControl = new L.Control.Draw({
+    position: "topleft",
+    draw: {
+      polygon:  { allowIntersection:false, showArea:true, shapeOptions:{ color:"#e63946", weight:2.5, fillColor:"#e63946", fillOpacity:0.12 } },
+      rectangle:{ shapeOptions:{ color:"#e63946", weight:2.5, fillColor:"#e63946", fillOpacity:0.12 } },
+      polyline:false, circle:false, circlemarker:false, marker:false
+    },
+    edit: { featureGroup:drawnItems, remove:true }
+  });
+  mapaPredio.addControl(drawControl);
+
+  /* Botón mover mapa */
+  const ControlMover = L.Control.extend({
+    options: { position:"topleft" },
+    onAdd: function () {
+      const div = L.DomUtil.create("div","leaflet-bar leaflet-control");
+      div.innerHTML = `<a class="leaflet-mover-btn" id="btnMoverMapa" href="#" title="Mover el mapa" role="button">✋</a>`;
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.on(div,"click",function(e){
+        L.DomEvent.preventDefault(e);
+        mapaPredio.fire("draw:drawstop");
+        mapaPredio.getContainer().style.cursor = "grab";
+        document.querySelectorAll(".leaflet-draw-toolbar a").forEach(a => a.classList.remove("leaflet-draw-toolbar-button-enabled"));
+        document.getElementById("btnMoverMapa")?.classList.add("mover-activo");
+      });
+      return div;
+    }
+  });
+  mapaPredio.addControl(new ControlMover());
+
+  /* Eventos de dibujo */
+  mapaPredio.on(L.Draw.Event.CREATED, async function (e) {
+    drawnItems.clearLayers();
+    drawnItems.addLayer(e.layer);
+    guardarLimitesPropiedad();
+    const centro = e.layer.getBounds().getCenter();
+    actualizarUbicacionPredio(centro.lat, centro.lng, "Ubicación centrada en el dibujo");
+    await completarDireccionPorCoordenadas(centro.lat, centro.lng);
+  });
+  mapaPredio.on(L.Draw.Event.EDITED, async function () {
+    guardarLimitesPropiedad();
+    if (drawnItems.getLayers().length > 0) {
+      const centro = drawnItems.getLayers()[0].getBounds().getCenter();
+      actualizarUbicacionPredio(centro.lat, centro.lng, "Ubicación actualizada al editar");
+      await completarDireccionPorCoordenadas(centro.lat, centro.lng);
+    }
+  });
+  mapaPredio.on(L.Draw.Event.DELETED, function () {
+    const campo = document.getElementById("limitesPropiedad");
+    if (campo) campo.value = "";
+    actualizarInfoLimites(null);
+  });
+  mapaPredio.on(L.Draw.Event.DRAWSTART, function () {
+    if (marcadorPredio && mapaPredio) { mapaPredio.removeLayer(marcadorPredio); marcadorPredio = null; }
+    const inputBuscar = document.getElementById("buscarDireccion");
+    if (inputBuscar) inputBuscar.value = "";
+    ["calle","numero","localidad","latitud","longitud","limitesPropiedad"].forEach(function(id) {
+      const el = document.getElementById(id); if (el) el.value = "";
+    });
+    const ct = document.getElementById("coordenadasTexto");
+    if (ct) ct.textContent = "Aún no se ha seleccionado una ubicación.";
+    actualizarInfoLimites(null);
+  });
+
+  /* Clic para marcar punto */
   mapaPredio.on("click", async function (e) {
+    if (mapaPredio._drawingMode) return;
+    if (drawnItems && drawnItems.getLayers().length > 0) {
+      drawnItems.clearLayers();
+      const campo = document.getElementById("limitesPropiedad"); if (campo) campo.value = "";
+      actualizarInfoLimites(null);
+    }
     actualizarUbicacionPredio(e.latlng.lat, e.latlng.lng, "Punto marcado en el mapa");
     await completarDireccionPorCoordenadas(e.latlng.lat, e.latlng.lng);
   });
 
   setTimeout(() => mapaPredio.invalidateSize(), 300);
+}
+
+function guardarLimitesPropiedad() {
+  const campo = document.getElementById("limitesPropiedad");
+  if (!campo || !drawnItems) return;
+  const geojson = drawnItems.toGeoJSON();
+  if (!geojson.features || geojson.features.length === 0) { campo.value = ""; actualizarInfoLimites(null); return; }
+  campo.value = JSON.stringify(geojson);
+  actualizarInfoLimites(geojson.features[0]);
+}
+
+function actualizarInfoLimites(feature) {
+  const badge      = document.getElementById("limitesBadge");
+  const texto      = document.getElementById("limitesTexto");
+  const btnLimpiar = document.getElementById("btnLimpiarLimites");
+  const wrap       = document.getElementById("limitesMiniMapaWrap");
+  const sinDemar   = document.getElementById("limitesSinDemarcar");
+  if (!badge) return;
+
+  if (!feature) {
+    badge.textContent = "Sin demarcar";
+    badge.className   = "limites-badge sin-limites";
+    if (wrap)      wrap.style.display      = "none";
+    if (sinDemar)  sinDemar.style.display  = "block";
+    if (texto)     texto.textContent       = "";
+    if (btnLimpiar) btnLimpiar.style.display = "none";
+    if (miniMapa) { miniMapa.remove(); miniMapa = null; miniMapaLayer = null; }
+    return;
+  }
+
+  badge.textContent = "Demarcado ✓";
+  badge.className   = "limites-badge con-limites";
+  if (sinDemar)  sinDemar.style.display  = "none";
+  if (wrap)      wrap.style.display      = "block";
+  if (btnLimpiar) btnLimpiar.style.display = "inline-block";
+
+  if (texto) {
+    const coords = feature.geometry.coordinates[0];
+    const n = feature.geometry.type === "Polygon" ? coords.length - 1 : coords.length;
+    texto.textContent = `Figura demarcada con ${n} vértice${n !== 1 ? "s" : ""}. Se incluirá en el PDF.`;
+  }
+
+  setTimeout(() => {
+    const contenedor = document.getElementById("limitesMiniMapa");
+    if (!contenedor) return;
+    if (!miniMapa) {
+      miniMapa = L.map("limitesMiniMapa",{ zoomControl:false, dragging:false, scrollWheelZoom:false,
+        doubleClickZoom:false, touchZoom:false, keyboard:false, attributionControl:false });
+      L.tileLayer("https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+        { subdomains:["0","1","2","3"], maxNativeZoom:21, maxZoom:21 }).addTo(miniMapa);
+    }
+    if (miniMapaLayer) { miniMapa.removeLayer(miniMapaLayer); miniMapaLayer = null; }
+    miniMapaLayer = L.geoJSON(feature, { style:{ color:"#e63946", weight:2.5, fillColor:"#e63946", fillOpacity:0.15 } }).addTo(miniMapa);
+    miniMapa.fitBounds(miniMapaLayer.getBounds(), { padding:[20,20] });
+    miniMapa.invalidateSize();
+  }, 150);
+}
+
+function decimalADMS(lat, lng) {
+  function toDMS(decimal, esLat) {
+    const abs = Math.abs(decimal);
+    const g = Math.floor(abs);
+    const minDec = (abs - g) * 60;
+    const m = Math.floor(minDec);
+    const s = ((minDec - m) * 60).toFixed(1);
+    const h = esLat ? (decimal >= 0 ? "N" : "S") : (decimal >= 0 ? "E" : "W");
+    return `${g}°${m}'${s}"${h}`;
+  }
+  return `${toDMS(lat, true)} ${toDMS(lng, false)}`;
 }
 
 function actualizarUbicacionPredio(lat, lng, texto) {
@@ -234,7 +400,7 @@ function actualizarUbicacionPredio(lat, lng, texto) {
   const lngF = Number(lng).toFixed(6);
   if (latInput)  latInput.value  = latF;
   if (lngInput)  lngInput.value  = lngF;
-  if (coordText) coordText.textContent = `${texto} | Latitud: ${latF} - Longitud: ${lngF}`;
+  if (coordText) coordText.textContent = `${texto} | ${decimalADMS(Number(lat), Number(lng))}`;
 
   if (marcadorPredio) {
     marcadorPredio.setLatLng([lat, lng]);
@@ -246,27 +412,52 @@ function actualizarUbicacionPredio(lat, lng, texto) {
       await completarDireccionPorCoordenadas(p.lat, p.lng);
     });
   }
-  marcadorPredio.bindPopup("Ubicación seleccionada para el croquis").openPopup();
 
-  // Detectar zona urbana/rural con polígonos oficiales
-  const zonaOficial = detectarZonaOficial(lat, lng);
-  if (zonaOficial) {
-    mostrarIndicadorZona(lat, lng, zonaOficial);
+  /* Detección de zona con límite oficial — instantánea al marcar el punto */
+  const zonaInmediata = puntoEnLimiteUrbano(lat, lng);
+  if (zonaInmediata) {
+    const zonaEl = document.getElementById("zona");
+    if (zonaEl) zonaEl.value = zonaInmediata;
+    mostrarIndicadorZona(zonaInmediata);
   }
 
   actualizarEstadoFlujo();
 }
 
+/* ================================================================
+   DETECCIÓN DE ZONA POR LÍMITE URBANO OFICIAL (MINVU 2013)
+   Algoritmo ray-casting sobre window.DOM_LIMITES_URBANOS.
+   Retorna "urbano" | "rural" | null (si no hay polígono cargado).
+   ================================================================ */
+function puntoEnLimiteUrbano(lat, lng) {
+  const limites = window.DOM_LIMITES_URBANOS;
+  if (!limites || !limites.coordinates || !limites.coordinates[0]) return null;
+  const poly = limites.coordinates[0]; // pares [lng, lat] en GeoJSON
+  let dentro = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i][0], yi = poly[i][1];
+    const xj = poly[j][0], yj = poly[j][1];
+    if (((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)) {
+      dentro = !dentro;
+    }
+  }
+  return dentro ? "urbano" : "rural";
+}
+
 async function completarDireccionPorCoordenadas(lat, lng) {
+  /* Zona ya fue establecida síncronamente en actualizarUbicacionPredio.
+     Aquí solo se obtiene para pasarla a autocompletarDireccionFormulario. */
+  const zonaPoligono = puntoEnLimiteUrbano(lat, lng);
+
   const params = new URLSearchParams({
     format: "jsonv2", lat: String(lat), lon: String(lng),
-    addressdetails: "1", "accept-language": "es",
+    addressdetails: "1", extratags: "1", zoom: "18", "accept-language": "es",
     countrycodes: cfg("codigoPais", "cl")
   });
   try {
     const r = await fetch(`https://nominatim.openstreetmap.org/reverse?${params}`);
     const d = await r.json();
-    if (d && d.address) autocompletarDireccionFormulario(d.address, d.display_name || "");
+    if (d && d.address) autocompletarDireccionFormulario(d.address, d.display_name || "", d.place_rank || null, zonaPoligono);
   } catch (e) { console.warn("No se pudo autocompletar desde el mapa.", e); }
 }
 
@@ -288,35 +479,59 @@ async function buscarDireccionEnMapa() {
     const d = await r.json();
     if (!d || d.length === 0) { alert("No se encontró la dirección. Marque el punto manualmente."); return; }
     const res = d[0];
-    mapaPredio.setView([parseFloat(res.lat), parseFloat(res.lon)], cfg("zoomBusqueda",17));
-    actualizarUbicacionPredio(parseFloat(res.lat), parseFloat(res.lon), "Dirección encontrada");
-    autocompletarDireccionFormulario(res.address || {}, dir);
+    const resLat = parseFloat(res.lat), resLng = parseFloat(res.lon);
+    mapaPredio.setView([resLat, resLng], cfg("zoomBusqueda",17));
+    actualizarUbicacionPredio(resLat, resLng, "Dirección encontrada");
+    autocompletarDireccionFormulario(res.address || {}, dir, res.place_rank || null, puntoEnLimiteUrbano(resLat, resLng));
   } catch (e) { alert("No se pudo buscar la dirección. Revise la conexión."); }
 }
 
 /* Autocompletar campos desde la dirección devuelta por Nominatim */
-function autocompletarDireccionFormulario(address = {}, textoBusqueda = "") {
+function autocompletarDireccionFormulario(address = {}, textoBusqueda = "", placeRank = null, zonaPoligono = null) {
   const calle = limpiarCalle(address.road||address.pedestrian||address.residential||address.footway||address.path||address.neighbourhood||"");
   const numero = address.house_number || extraerNumeroDireccion(textoBusqueda);
   const localidad = address.city||address.town||address.village||address.hamlet||address.municipality||address.county||address.suburb||cfg("localidadPredeterminada","")||cfg("comunaBusqueda","");
-  const zonaDetectada = (address.hamlet||address.farm||address.allotments) ? "rural" : (address.city||address.town||address.village||address.suburb||address.neighbourhood) ? "urbano" : "";
 
-  const inputNumero = document.getElementById("numero");
-  if (inputNumero) inputNumero.value = "";
+  /* Zona: polígono oficial tiene prioridad; Nominatim como respaldo */
+  let zonaDetectada;
+  if (zonaPoligono) {
+    zonaDetectada = zonaPoligono;
+  } else {
+    const indicadoresUrbano = [address.city, address.town, address.suburb, address.neighbourhood, address.quarter, address.industrial, address.commercial, address.residential, address.allotments, address.retail];
+    const indicadoresRural  = [address.village, address.hamlet, address.farm, address.farmyard, address.isolated_dwelling, address.locality, address.municipality];
+    const esUrbano = indicadoresUrbano.some(Boolean);
+    const esRural  = !esUrbano && indicadoresRural.some(Boolean);
+    zonaDetectada = esUrbano ? "urbano" : esRural ? "rural" : (placeRank !== null ? (placeRank <= 16 ? "urbano" : "rural") : "");
+  }
+
   asignarValor("calle", calle, true);
 
   const checkSN = document.getElementById("sinNumero");
   if (checkSN && checkSN.checked) asignarValor("numero","S/N",true);
-  else if (numero) asignarValor("numero", numero, true);
+  else asignarValor("numero", numero, true);
 
   asignarValor("localidad", localidad, true);
 
-  const zona = document.getElementById("zona");
-  if (zona && zonaDetectada)                   zona.value = zonaDetectada;
-  else if (zona && cfg("zonaPredeterminada","") && !zona.value) zona.value = cfg("zonaPredeterminada","");
+  const zonaEl = document.getElementById("zona");
+  if (zonaEl && zonaDetectada) zonaEl.value = zonaDetectada;
+  else if (zonaEl && cfg("zonaPredeterminada","") && !zonaEl.value) zonaEl.value = cfg("zonaPredeterminada","");
 
+  mostrarIndicadorZona(zonaDetectada);
   actualizarEstadoFlujo();
 }
+
+function mostrarIndicadorZona(zona) {
+  const panel = document.getElementById("zonaDetectadaPanel");
+  if (!panel) return;
+  if (!zona) { panel.style.display = "none"; return; }
+  const esUrbano = zona === "urbano";
+  panel.style.display = "flex";
+  panel.className = "zona-detectada-panel " + (esUrbano ? "zona-urbana" : "zona-rural");
+  panel.textContent = esUrbano
+    ? "🏙 Zona Urbana — detectado automáticamente"
+    : "🌿 Zona Rural — detectado automáticamente";
+}
+
 
 /* ── flujo de pasos ── */
 function hayUbicacionSeleccionada() {
@@ -329,25 +544,34 @@ function actualizarPaso(id, estado) {
   if (estado) p.classList.add(estado);
 }
 function actualizarEstadoFlujo() {
-  const hay = hayUbicacionSeleccionada();
-  const chk = document.getElementById("checkConsentimiento");
-  const ok  = hay && (!chk || chk.checked);
+  const hayUbicacion = hayUbicacionSeleccionada();
+  const cfgConsent = cfg("consentimiento", {});
+  const consentimientoRequerido = cfgConsent.requerido !== false;
+  const chkConsent = document.getElementById("consentimientoDatos");
+  const hayConsentimiento = !consentimientoRequerido || (chkConsent ? chkConsent.checked : false);
+  const ok = hayUbicacion && hayConsentimiento;
+
   ["btnGuardarDatos","btnGenerarPdf","btnImprimirPdf"].forEach(id => {
     const b = document.getElementById(id);
     if (b) b.disabled = !ok;
   });
+
   const est = document.getElementById("estadoUbicacion");
   if (est) {
-    if (hay) {
-      est.textContent = "Ubicación lista. Revise los datos y complete los datos personales.";
-      est.classList.replace("pendiente","listo");
-    } else {
+    if (!hayUbicacion) {
       est.textContent = "Seleccione una ubicación para continuar con el formulario.";
-      est.classList.replace("listo","pendiente");
+      est.classList.remove("listo"); est.classList.add("pendiente");
+    } else if (!hayConsentimiento) {
+      est.textContent = "Ubicación lista. Debe aceptar el consentimiento de datos para continuar.";
+      est.classList.remove("pendiente"); est.classList.add("listo");
+    } else {
+      est.textContent = "Ubicación lista. Revise los datos autocompletados y complete los datos personales.";
+      est.classList.remove("pendiente"); est.classList.add("listo");
     }
   }
-  if (hay) { actualizarPaso("pasoUbicacion","completado"); actualizarPaso("pasoFormulario","activo"); actualizarPaso("pasoPdf",""); }
-  else      { actualizarPaso("pasoUbicacion","activo");    actualizarPaso("pasoFormulario","");       actualizarPaso("pasoPdf",""); }
+
+  if (hayUbicacion) { actualizarPaso("pasoUbicacion","completado"); actualizarPaso("pasoFormulario","activo"); actualizarPaso("pasoPdf",""); }
+  else              { actualizarPaso("pasoUbicacion","activo");      actualizarPaso("pasoFormulario","");       actualizarPaso("pasoPdf",""); }
 }
 function irAlFormularioDespuesDeUbicacion() {
   if (!hayUbicacionSeleccionada()) { alert("Primero debe buscar una dirección o marcar el punto en el mapa."); return; }
@@ -370,7 +594,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!validarFormularioCip()) return;
     actualizarPaso("pasoFormulario","completado");
     actualizarPaso("pasoPdf","activo");
-    alert("Datos preparados. Ahora puede descargar o imprimir el formulario PDF.");
+    alert("Datos preparados correctamente. Ahora puede descargar o imprimir el formulario PDF.");
   });
 
   const btnPdf = document.getElementById("btnGenerarPdf");
@@ -378,21 +602,17 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnImp = document.getElementById("btnImprimirPdf");
   if (btnImp) btnImp.addEventListener("click", () => generarPdfCip(true));
 
-  /* ── checkbox consentimiento: renderizar texto desde config ── */
-  const spanConsent = document.getElementById("textoConsentimientoSpan");
-  if (spanConsent && window.DOM_CONFIG && window.DOM_CONFIG.consentimiento) {
-    const c   = window.DOM_CONFIG.consentimiento;
-    const mun = window.DOM_CONFIG.municipalidadCorta || window.DOM_CONFIG.municipalidad || "";
-    const txt = (c.textoConsentimiento || "").replace("{municipalidad}", mun);
-    if (c.urlPoliticaPrivacidad && c.textoEnlace) {
-      spanConsent.innerHTML = txt + ' <a href="' + c.urlPoliticaPrivacidad + '" target="_blank" rel="noopener">' + c.textoEnlace + '</a>.';
-    } else {
-      spanConsent.textContent = txt + ".";
-    }
+  const btnLimpiarLimites = document.getElementById("btnLimpiarLimites");
+  if (btnLimpiarLimites) {
+    btnLimpiarLimites.addEventListener("click", function () {
+      if (drawnItems) drawnItems.clearLayers();
+      const campo = document.getElementById("limitesPropiedad"); if (campo) campo.value = "";
+      actualizarInfoLimites(null);
+    });
   }
 
-  const chkConsent = document.getElementById("checkConsentimiento");
-  if (chkConsent) chkConsent.addEventListener("change", actualizarEstadoFlujo);
+  /* Consentimiento dinámico desde config.js */
+  inicializarConsentimiento();
 });
 
 /* ================================================================
@@ -429,8 +649,33 @@ async function cargarPdfBaseCip() {
 
 async function capturarMapaParaPdf() {
   if (mapaPredio) mapaPredio.invalidateSize();
-  const canvas = await html2canvas(document.getElementById("mapaPredio"),{ useCORS:true,backgroundColor:"#fff",scale:2 });
-  return canvas.toDataURL("image/png");
+  const canvas = await html2canvas(document.getElementById("mapaPredio"),{
+    useCORS:true, allowTaint:false, backgroundColor:"#ffffff", scale:2, foreignObjectRendering:false
+  });
+
+  /* Dibujar el polígono encima si existe (html2canvas no captura SVG de Leaflet) */
+  if (drawnItems && drawnItems.getLayers().length > 0) {
+    const ctx = canvas.getContext("2d");
+    const escala = 2;
+    drawnItems.eachLayer(function (layer) {
+      const coords = layer.getLatLngs ? layer.getLatLngs()[0] : null;
+      if (!coords || coords.length < 2) return;
+      ctx.beginPath();
+      coords.forEach(function (latlng, i) {
+        const pt = mapaPredio.latLngToContainerPoint(latlng);
+        if (i === 0) ctx.moveTo(pt.x * escala, pt.y * escala);
+        else ctx.lineTo(pt.x * escala, pt.y * escala);
+      });
+      ctx.closePath();
+      ctx.fillStyle = "rgba(230,57,70,0.18)"; ctx.fill();
+      ctx.strokeStyle = "#e63946"; ctx.lineWidth = 2.5 * escala; ctx.stroke();
+    });
+  }
+
+  return {
+    imagen: canvas.toDataURL("image/png"),
+    bounds: mapaPredio ? mapaPredio.getBounds() : null
+  };
 }
 
 function cortarTexto(t,max) { return String(t||"").length>max ? String(t).substring(0,max) : String(t||""); }
@@ -521,22 +766,73 @@ async function generarPdfCip(imprimir=false) {
     campo("planoLoteo",obtenerValor("planoLoteo"),{x:412,y:595,size:8,bold:false,max:18});
     campo("rolSii",  obtenerValor("rolSii"),  {x:512,y:595,size:8,bold:false,max:18});
 
-    const imgBase64 = await capturarMapaParaPdf();
-    const imgPng    = await pdfDoc.embedPng(imgBase64);
-    const posMapa   = cfgPdf("mapa",{x:55,y:305,width:529,height:259});
+    const capturaInfo = await capturarMapaParaPdf();
+    const imgPng      = await pdfDoc.embedPng(capturaInfo.imagen);
+    const posMapa     = cfgPdf("mapa",{x:55,y:305,width:529,height:259});
     pagina.drawImage(imgPng,{x:posMapa.x,y:posMapa.y,width:posMapa.width,height:posMapa.height});
 
     const posCoord = cfgPdf("coordenadas",{x:65,y:312,size:8,bold:true,max:80});
-    escribir(`Latitud: ${obtenerValor("latitud")}    Longitud: ${obtenerValor("longitud")}`,posCoord.x,posCoord.y,posCoord.size||8,posCoord.bold!==false);
+    if (obtenerValor("latitud") && obtenerValor("longitud")) {
+      const textoCoord = decimalADMS(Number(obtenerValor("latitud")), Number(obtenerValor("longitud")));
+      escribir(textoCoord, posCoord.x, posCoord.y, posCoord.size||8, posCoord.bold!==false);
+    }
+
+    /* Polígono de deslindes dibujado sobre el PDF */
+    const limitesJson = obtenerValor("limitesPropiedad");
+    if (limitesJson && capturaInfo.bounds) {
+      try {
+        const geojson = JSON.parse(limitesJson);
+        const feature = geojson.features?.[0];
+        const bounds  = capturaInfo.bounds;
+        if (feature && bounds) {
+          const swLat=bounds.getSouth(), neLat=bounds.getNorth(), swLng=bounds.getWest(), neLng=bounds.getEast();
+          function geo2pdf(lat, lng) {
+            return { x: posMapa.x + ((lng-swLng)/(neLng-swLng))*posMapa.width,
+                     y: posMapa.y + ((lat-swLat)/(neLat-swLat))*posMapa.height };
+          }
+          const anillo = feature.geometry.coordinates[0];
+          const rojo = rgb(0.9,0.15,0.2);
+          for (let i=0; i<anillo.length-1; i++) {
+            pagina.drawLine({ start:geo2pdf(anillo[i][1],anillo[i][0]), end:geo2pdf(anillo[i+1][1],anillo[i+1][0]), thickness:2, color:rojo, opacity:0.92 });
+          }
+          for (let i=0; i<anillo.length-1; i++) {
+            const p = geo2pdf(anillo[i][1],anillo[i][0]);
+            pagina.drawCircle({ x:p.x, y:p.y, size:3, color:rojo, opacity:0.9 });
+          }
+        }
+      } catch (_) { /* ignorar si el GeoJSON falla */ }
+    }
 
     escribirPos(muni, cfgPdf("municipalidadComprobante",{x:255,y:190,size:9,bold:true,max:35}));
     campo("calleComprobante", obtenerValor("calle"),  {x:60, y:116,size:8,bold:false,max:65});
     campo("numeroComprobante",obtenerValor("numero"), {x:500,y:116,size:8,bold:false,max:15});
 
+    /* Fecha y hora de generación */
+    const ahora = new Date();
+    const fechaGen = ahora.toLocaleDateString("es-CL",{day:"2-digit",month:"2-digit",year:"numeric"});
+    const horaGen  = ahora.toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
+    const posFecha = cfgPdf("fechaGeneracionPdf",{x:400,y:730,size:7.5,bold:true,max:45});
+    escribir(`Generado: ${fechaGen}  ${horaGen} hrs.`, posFecha.x, posFecha.y, posFecha.size||7.5, posFecha.bold===true);
+
+    /* Registro de consentimiento en el PDF */
+    const cfgConsent = cfg("consentimiento", {});
+    if (cfgConsent.registrarEnPdf && document.getElementById("consentimientoDatos")?.checked) {
+      const fechaHora = ahora.toLocaleDateString("es-CL") + " " + ahora.toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
+      const textoConsent = `El solicitante autorizó el tratamiento de sus datos personales el ${fechaHora} hrs.`;
+      const posConsent = cfgPdf("consentimientoPdf",{x:55,y:95,size:6.5,bold:false,max:120});
+      escribir(textoConsent, posConsent.x, posConsent.y, posConsent.size||6.5, posConsent.bold===true);
+    }
+
     const blob = new Blob([await pdfDoc.save()],{type:"application/pdf"});
     const url  = URL.createObjectURL(blob);
-    if (imprimir) { const w=window.open(url,"_blank"); if(w) w.onload=()=>w.print(); }
-    else { const a=document.createElement("a"); a.href=url; a.download=`formulario_cip_${Date.now()}.pdf`; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+    if (imprimir) {
+      const w = window.open(url,"_blank");
+      if (w) { w.onload = function(){ w.print(); URL.revokeObjectURL(url); setTimeout(limpiarFormulario,1500); }; }
+    } else {
+      const a = document.createElement("a"); a.href=url; a.download=`formulario_cip_${Date.now()}.pdf`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); limpiarFormulario(); }, 1500);
+    }
   } catch(e) { console.error(e); alert("No se pudo generar el PDF. Revise las rutas del PDF base en config.js."); }
 }
 
@@ -632,6 +928,98 @@ function activarOpcionSinNumero() {
 }
 
 /* ================================================================
+   LIMPIAR FORMULARIO — reset completo tras generar PDF
+   ================================================================ */
+function limpiarFormulario() {
+  ["nombre","rut","email","telefono","calle","numero","depto","block",
+   "manzana","lote","localidad","planoLoteo","rolSii","latitud","longitud","limitesPropiedad"
+  ].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) { el.value = ""; el.style.borderColor = ""; el.setCustomValidity && el.setCustomValidity(""); }
+  });
+  const inputBuscar = document.getElementById("buscarDireccion");
+  if (inputBuscar) inputBuscar.value = "";
+  ["rutMensaje","telefonoMensaje"].forEach(function(id) {
+    const el = document.getElementById(id); if (el) el.textContent = "";
+  });
+  const zona = document.getElementById("zona"); if (zona) zona.selectedIndex = 0;
+  const sinNum = document.getElementById("sinNumero"); if (sinNum) sinNum.checked = false;
+  const consent = document.getElementById("consentimientoDatos"); if (consent) consent.checked = false;
+  const panelZona = document.getElementById("zonaDetectadaPanel"); if (panelZona) panelZona.style.display = "none";
+  const ct = document.getElementById("coordenadasTexto"); if (ct) ct.textContent = "Aún no se ha seleccionado una ubicación.";
+  if (marcadorPredio && mapaPredio) { mapaPredio.removeLayer(marcadorPredio); marcadorPredio = null; }
+  if (drawnItems) drawnItems.clearLayers();
+  actualizarInfoLimites(null);
+  actualizarPaso("pasoUbicacion","activo");
+  actualizarPaso("pasoFormulario","");
+  actualizarPaso("pasoPdf","");
+  actualizarEstadoFlujo();
+}
+
+/* ================================================================
+   CONSENTIMIENTO DINÁMICO — se renderiza desde config.js
+   ================================================================ */
+function escaparHtml(str) {
+  return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function inicializarConsentimiento() {
+  const contenedor = document.getElementById("consentimientoContainer");
+  if (!contenedor) return;
+
+  const cfgC = cfg("consentimiento", {});
+  if (!cfgC.textoConsentimiento) return;
+
+  const mun  = cfg("municipalidadCorta", cfg("municipalidad","la Municipalidad"));
+  /* replaceAll para múltiples tokens; escaparHtml evita XSS desde config */
+  const texto = cfgC.textoConsentimiento.replaceAll("{municipalidad}", escaparHtml(mun));
+
+  /* Construcción segura: DOM API en lugar de innerHTML con concatenación */
+  const wrapper = document.createElement("div");
+  wrapper.className = "form-group consent-group";
+
+  const label = document.createElement("label");
+  label.className = "consent-label";
+
+  const chk = document.createElement("input");
+  chk.type = "checkbox";
+  chk.id   = "consentimientoDatos";
+  chk.checked = false; /* siempre desactivado al cargar */
+
+  const span = document.createElement("span");
+  span.appendChild(document.createTextNode(texto + " "));
+
+  /* Soporta array `leyes` (nuevo) y campo único legacy (textoEnlace + urlPoliticaPrivacidad) */
+  const leyes = Array.isArray(cfgC.leyes) && cfgC.leyes.length
+    ? cfgC.leyes
+    : (cfgC.textoEnlace ? [{ texto: cfgC.textoEnlace, url: cfgC.urlPoliticaPrivacidad || "" }] : []);
+
+  leyes.forEach(function(ley, i) {
+    if (i > 0) {
+      span.appendChild(document.createTextNode(i === leyes.length - 1 ? " y la " : ", la "));
+    }
+    if (ley.url) {
+      const a = document.createElement("a");
+      a.href        = ley.url;
+      a.target      = "_blank";
+      a.rel         = "noopener";
+      a.textContent = ley.texto;
+      span.appendChild(a);
+    } else {
+      span.appendChild(document.createTextNode(ley.texto));
+    }
+  });
+  span.appendChild(document.createTextNode(leyes.length ? "." : ""));
+
+  label.appendChild(chk);
+  label.appendChild(span);
+  wrapper.appendChild(label);
+  contenedor.appendChild(wrapper);
+
+  chk.addEventListener("change", actualizarEstadoFlujo);
+}
+
+/* ================================================================
    DETECCIÓN DE ZONA URBANA/RURAL — usando polígonos oficiales
    ================================================================ */
 
@@ -668,95 +1056,4 @@ function detectarZonaOficial(lat, lng) {
   return "rural";
 }
 
-/**
- * Muestra un indicador visual en el mapa con la zona detectada
- * y permite al usuario corregirla.
- */
-function mostrarIndicadorZona(lat, lng, zonaDetectada) {
-  // Eliminar indicador anterior si existe
-  const anteriorPopup = document.getElementById("zonaIndicador");
-  if (anteriorPopup) anteriorPopup.remove();
-
-  const zonaSelect = document.getElementById("zona");
-  if (!zonaSelect) return;
-
-  // Asignar zona detectada
-  zonaSelect.value = zonaDetectada;
-
-  // Mostrar notificación visual sobre el mapa
-  const contenedorMapa = document.getElementById("mapaPredio");
-  if (!contenedorMapa) return;
-
-  const indicador = document.createElement("div");
-  indicador.id = "zonaIndicador";
-  indicador.style.cssText = `
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    background: ${zonaDetectada === "urbano" ? "#0f3c68" : "#2d6a4f"};
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-  `;
-  indicador.innerHTML = `
-    <span>${zonaDetectada === "urbano" ? "🏙️ Zona Urbana detectada" : "🌿 Zona Rural detectada"}</span>
-    <span style="opacity:.7;font-weight:400;font-size:.78rem">¿No es correcto?</span>
-    <button onclick="corregirZona()" style="
-      background:rgba(255,255,255,.2);
-      border:1px solid rgba(255,255,255,.4);
-      color:#fff;
-      border-radius:10px;
-      padding:3px 10px;
-      font-size:.78rem;
-      font-weight:700;
-      cursor:pointer;
-    ">Cambiar</button>
-  `;
-
-  // Posicionar relativo al contenedor del mapa
-  contenedorMapa.style.position = "relative";
-  contenedorMapa.appendChild(indicador);
-
-  // Auto-ocultar después de 6 segundos
-  setTimeout(() => {
-    if (indicador.parentNode) {
-      indicador.style.opacity = "0";
-      indicador.style.transition = "opacity 0.5s";
-      setTimeout(() => indicador.remove(), 500);
-    }
-  }, 6000);
-}
-
-/**
- * Permite al usuario corregir manualmente la zona
- * mostrando el selector de forma destacada.
- */
-window.corregirZona = function () {
-  const indicador = document.getElementById("zonaIndicador");
-  if (indicador) indicador.remove();
-
-  const zonaSelect = document.getElementById("zona");
-  if (!zonaSelect) return;
-
-  // Scroll al selector y destacarlo
-  zonaSelect.scrollIntoView({ behavior: "smooth", block: "center" });
-  zonaSelect.style.transition = "box-shadow 0.3s, border-color 0.3s";
-  zonaSelect.style.borderColor = "#2f76ea";
-  zonaSelect.style.boxShadow = "0 0 0 4px rgba(47,118,234,0.25)";
-
-  setTimeout(() => {
-    zonaSelect.style.borderColor = "";
-    zonaSelect.style.boxShadow = "";
-  }, 3000);
-
-  zonaSelect.focus();
-};
+/* mostrarIndicadorZona está definida arriba */

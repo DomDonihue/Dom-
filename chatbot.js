@@ -33,11 +33,14 @@
       inicio: {
         mensaje: reemplazar(cbCfg.saludo || "¡Hola! 👋 Soy el asistente virtual de la DOM de {municipalidad}.\n\n¿En qué puedo ayudarte hoy?"),
         opciones: [
-          { texto: "📄 Certificados disponibles",    siguiente: "certificados" },
-          { texto: "🗺️ Preparar solicitud (CIP)",    siguiente: "preparar_solicitud" },
-          { texto: "⏱ Plazos de tramitación",        siguiente: "plazos" },
-          { texto: "📋 Documentos requeridos",        siguiente: "documentos_general" },
-          { texto: "📞 Contacto y horarios",          siguiente: "contacto" }
+          { texto: "🏛️ ¿Qué es DOM en Línea?",       siguiente: "que_es_dom" },
+          { texto: "⚙️ ¿Para qué sirve?",             siguiente: "para_que_sirve" },
+          { texto: "🖱️ ¿Cómo lo uso?",                siguiente: "como_lo_uso" },
+          { texto: "📄 Certificados disponibles",      siguiente: "certificados" },
+          { texto: "🗺️ Preparar solicitud (CIP)",      siguiente: "preparar_solicitud" },
+          { texto: "⏱ Plazos de tramitación",          siguiente: "plazos" },
+          { texto: "📋 Documentos requeridos",          siguiente: "documentos_general" },
+          { texto: "📞 Contacto y horarios",            siguiente: "contacto" }
         ]
       },
 
@@ -86,6 +89,33 @@
         mensaje: reemplazar(cbCfg.mensajeContacto || "📞 **Contacto DOM de {municipalidad}**\n\n📍 {direccion}\n☎️ {telefono}\n✉️ {email}\n\n⏰ **Horarios:**\n{horario}"),
         opciones: [
           { texto: "🌐 Ir a DOM en Línea", accion: "abrir_url", url: urlDom }
+        ]
+      },
+
+      que_es_dom: {
+        mensaje: reemplazar(cbCfg.mensajeQueEsDom || "🏛️ **¿Qué es DOM en Línea?**\n\nEs la plataforma digital de la Dirección de Obras Municipales que permite gestionar certificados y trámites sin necesidad de acudir presencialmente."),
+        opciones: [
+          { texto: "⚙️ ¿Para qué sirve?",           siguiente: "para_que_sirve" },
+          { texto: "🖱️ ¿Cómo lo uso?",              siguiente: "como_lo_uso" },
+          { texto: "🗺️ Preparar solicitud ahora",    accion: "scroll_a", id: "preparar-solicitud" }
+        ]
+      },
+
+      para_que_sirve: {
+        mensaje: reemplazar(cbCfg.mensajeParaQueSirve || "⚙️ **¿Para qué sirve DOM en Línea?**\n\nPermite orientar a los usuarios, agilizar procesos y facilitar la solicitud de certificados municipales."),
+        opciones: [
+          { texto: "🏛️ ¿Qué es DOM en Línea?",      siguiente: "que_es_dom" },
+          { texto: "🖱️ ¿Cómo lo uso?",              siguiente: "como_lo_uso" },
+          { texto: "📄 Ver certificados",             siguiente: "certificados" }
+        ]
+      },
+
+      como_lo_uso: {
+        mensaje: reemplazar(cbCfg.mensajeComoLoUso || "🖱️ **¿Cómo se usa DOM en Línea?**\n\n1️⃣ Selecciona el certificado\n2️⃣ Revisa los documentos requeridos\n3️⃣ Ubica tu predio en el mapa\n4️⃣ Descarga el formulario PDF\n5️⃣ Ingresa a domenlinea.minvu.cl con tu ClaveÚnica"),
+        opciones: [
+          { texto: "🗺️ Ir al asistente de solicitud", accion: "scroll_a", id: "preparar-solicitud" },
+          { texto: "❓ ¿Qué necesito tener listo?",   siguiente: "que_necesito" },
+          { texto: "🌐 Ir a DOM en Línea",             accion: "abrir_url", url: urlDom }
         ]
       }
     };

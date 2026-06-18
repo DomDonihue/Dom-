@@ -556,7 +556,7 @@ img {
 /* FORMULARIO PREPARAR SOLICITUD */
 .solicitud-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 22px;
   align-items:stretch;
 }
@@ -581,7 +581,7 @@ img {
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
   margin-bottom: 22px;
 }
@@ -632,8 +632,8 @@ img {
 
 #mapaPredio {
   width: 100%;
-  height: 480px;
-  min-height: 420px;
+  height: 580px;
+  min-height: 520px;
   position: relative;
   display: block;
   flex: none;
@@ -661,34 +661,108 @@ img {
   color: var(--muted);
 }
 
-.consentimiento-bloque {
-  margin-top: 18px;
-  padding: 12px 16px;
-  background: #eef4ff;
-  border: 1px solid #b6d0f7;
+/* CONSENTIMIENTO DATOS PERSONALES */
+.consent-group {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
   border-radius: 8px;
+  padding: 14px 16px;
+  margin-top: 8px;
 }
-.consentimiento-label {
-  display: flex;
+.consent-label {
+  display: flex !important;
   align-items: flex-start;
   gap: 10px;
-  font-size: 0.875rem;
-  color: #1e3a5f;
   cursor: pointer;
-  line-height: 1.4;
+  font-weight: 400 !important;
+  color: var(--text) !important;
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
-.consentimiento-label input[type="checkbox"] {
+.consent-label input[type="checkbox"] {
+  width: 16px !important;
+  height: 16px;
   margin-top: 2px;
   flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  accent-color: var(--primary, #2563eb);
+  accent-color: var(--accent);
   cursor: pointer;
 }
-.consentimiento-label a {
-  color: #2563eb;
+.consent-label a {
+  color: var(--accent);
   text-decoration: underline;
 }
+
+/* CAMPO REQUERIDO */
+.campo-requerido {
+  color: #dc2626;
+  font-weight: 700;
+}
+.leyenda-requerido {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+/* BOTÓN PEQUEÑO */
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  min-height: 32px;
+}
+
+/* LÍMITES DEL PREDIO */
+.limites-box {
+  background: #fff8f1;
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+.limites-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.limites-icon { font-size: 1.1rem; color: #e63946; }
+.limites-header strong { flex: 1; color: var(--primary); font-size: 0.93rem; }
+.limites-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.limites-badge.sin-limites { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+.limites-badge.con-limites { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.limites-ayuda { font-size: 0.83rem; color: var(--muted); line-height: 1.5; margin: 0 0 8px; }
+.limites-info {
+  font-size: 0.83rem; color: #166534; background: #f0fdf4;
+  border: 1px solid #bbf7d0; border-radius: 6px; padding: 6px 10px; margin: 8px 0 6px;
+}
+.limites-info-pendiente { font-size: 0.83rem; color: #94a3b8; margin: 6px 0 0; font-style: italic; }
+.limites-minimap-label {
+  font-size: 0.8rem; font-weight: 700; color: #475569;
+  margin: 10px 0 6px; display: flex; align-items: center; gap: 5px;
+}
+.limites-minimap { width: 100%; height: 240px; border-radius: 8px; border: 2px solid #fca5a5; overflow: hidden; }
+
+/* ZONA DETECTADA AUTOMÁTICAMENTE */
+.zona-detectada-panel {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 10px; padding: 9px 14px; border-radius: 8px;
+  font-size: 0.87rem; font-weight: 500;
+}
+.zona-detectada-panel.zona-urbana { background: #eff6ff; border: 1px solid #93c5fd; color: #1d4ed8; }
+.zona-detectada-panel.zona-rural  { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+
+
+/* LEAFLET DRAW */
+.leaflet-mover-btn { font-size: 1rem !important; line-height: 26px !important; }
+.leaflet-mover-btn.mover-activo { background: #e0edff !important; }
+.leaflet-draw-toolbar a { border-radius: 4px !important; }
 
 .form-actions {
   margin-top: 10px;
@@ -1120,7 +1194,7 @@ img {
   }
 
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .map-search {
@@ -1128,7 +1202,16 @@ img {
   }
 
   #mapaPredio {
-    height: 340px;
+    height: 420px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  #mapaPredio {
+    height: 300px;
   }
 }
 
