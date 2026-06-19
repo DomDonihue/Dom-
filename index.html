@@ -21,6 +21,7 @@
         <a href="#inicio">Inicio</a>
         <a href="#faq">Información</a>
         <a href="#certificados">Certificados</a>
+        <a href="#certificado-numero">Certificado N°</a>
         <a href="#preparar-solicitud">Preparar solicitud</a>
         <a href="#documentos">Documentos</a>
         <a href="#faq">Preguntas frecuentes</a>
@@ -90,6 +91,96 @@
         </div>
       </div>
       <div class="accordion" id="certificadosAccordion"></div>
+    </div>
+  </section>
+
+  <!-- CERTIFICADO DE NÚMERO -->
+  <section class="section" id="certificado-numero">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Servicio digital</span>
+          <h2>Certificado de Número</h2>
+          <p style="color:var(--muted);margin-top:6px;max-width:620px">Consulte si su predio está en nuestra base histórica. Si está registrado, el certificado se genera de inmediato para imprimir. Si no, le enviamos la consulta al equipo DOM.</p>
+        </div>
+      </div>
+
+      <div class="cn-layout">
+        <!-- Panel búsqueda -->
+        <div class="cn-panel">
+          <h3>1. Buscar predio</h3>
+          <p class="form-help">Ingrese nombre del propietario, ROL SII o dirección.</p>
+          <div class="cn-busqueda-row">
+            <input type="text" id="cn-busqueda" class="cn-input" placeholder="Ej: Juan Pérez, 455-12 o Calle Los Boldos">
+            <button type="button" class="btn btn-accent" id="cn-btn-buscar">Buscar</button>
+          </div>
+          <div id="cn-status" class="cn-status" style="display:none"></div>
+          <div id="cn-resultados"></div>
+        </div>
+
+        <!-- Panel formulario y generación -->
+        <div class="cn-panel" id="cn-formulario">
+          <h3>2. Datos del predio</h3>
+          <p class="form-help">Complete o corrija los datos antes de generar el certificado.</p>
+          <div class="cn-form-grid">
+            <div class="form-group">
+              <label>Nombre propietario / solicitante <span class="campo-requerido">*</span></label>
+              <input type="text" id="cn-nombre" class="cn-input" placeholder="Nombre completo">
+            </div>
+            <div class="form-group">
+              <label>ROL SII</label>
+              <input type="text" id="cn-rol" class="cn-input" placeholder="Ej: 455-12">
+            </div>
+            <div class="form-group">
+              <label>Calle o camino <span class="campo-requerido">*</span></label>
+              <input type="text" id="cn-calle" class="cn-input" placeholder="Ej: Los Boldos">
+            </div>
+            <div class="form-group">
+              <label>Número</label>
+              <input type="text" id="cn-numero" class="cn-input" placeholder="Ej: 344">
+            </div>
+            <div class="form-group">
+              <label>Manzana</label>
+              <input type="text" id="cn-manzana" class="cn-input" placeholder="Opcional">
+            </div>
+            <div class="form-group">
+              <label>Lote</label>
+              <input type="text" id="cn-lote" class="cn-input" placeholder="Opcional">
+            </div>
+            <div class="form-group">
+              <label>Localidad</label>
+              <input type="text" id="cn-localidad" class="cn-input" placeholder="Ej: Doñihue">
+            </div>
+            <div class="form-group">
+              <label>Zona</label>
+              <select id="cn-zona" class="cn-input">
+                <option value="urbano">Urbano</option>
+                <option value="rural">Rural</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>N° oficial asignado</label>
+              <input type="text" id="cn-numero-oficial" class="cn-input" placeholder="Completar por DOM">
+            </div>
+            <div class="form-group">
+              <label>E-mail de contacto</label>
+              <input type="email" id="cn-email" class="cn-input" placeholder="correo@ejemplo.cl">
+            </div>
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input type="text" id="cn-telefono" class="cn-input" placeholder="9 1234 5678">
+            </div>
+            <div class="form-group" style="display:none">
+              <input type="text" id="cn-direccion">
+            </div>
+          </div>
+          <div class="form-actions cn-acciones">
+            <button type="button" class="btn btn-accent" id="cn-btn-generar">Generar e imprimir certificado</button>
+            <button type="button" class="btn btn-outline" id="cn-btn-correo">Enviar consulta por correo</button>
+          </div>
+          <p class="cn-aviso-legal">El certificado generado es de carácter referencial. Para tener validez oficial debe ser firmado y timbrado por el Director de Obras Municipales de Doñihue.</p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -179,6 +270,13 @@
               <option value="URBANIZACION">Urbanización</option>
               <option value="OTROS">Otros</option>
             </select>
+          </div>
+
+          <!-- aviso dinámico cuando se selecciona NUMERO -->
+          <div id="cn-aviso-cip" style="display:none;margin:0 0 18px;padding:12px 16px;background:#eaf2ff;border-left:4px solid #2f76ea;border-radius:8px;font-size:0.92em">
+            <strong>¿Necesita el Certificado de Número?</strong>
+            Puede generarlo directamente con la información del registro histórico DOM.
+            <a href="#certificado-numero" style="color:#2f76ea;font-weight:bold;margin-left:6px">Ir a Certificado de N° →</a>
           </div>
 
           <h3>Datos de la propiedad</h3>
@@ -280,6 +378,7 @@
   <script src="zonas.js"></script>
   <script src="script.js"></script>
   <script src="chatbot.js"></script>
+  <script src="cn_module.js"></script>
 
   <!-- Aplicar URLs desde config tras cargar scripts -->
   <script>
