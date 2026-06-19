@@ -136,10 +136,6 @@
 
     const { calle, numero, localidad } = parsearDireccion(rec.d);
 
-    /* Nombre: solo si el campo está vacío */
-    const campNombre = document.getElementById("nombre");
-    if (campNombre && !campNombre.value.trim()) set("nombre", rec.n);
-
     set("rolSii",    String(rec.r || "").replace(/[,;\s]+$/, ""));
     set("calle",     calle);
     set("numero",    numero === "S/N" ? "" : numero);
@@ -160,14 +156,23 @@
     const aviso = document.getElementById("cn-aviso-cip");
     if (aviso) aviso.style.display = "block";
 
-    /* Ir al formulario CIP */
+    /* Ir al formulario CIP y luego marcar en el mapa */
     const seccion = document.getElementById("preparar-solicitud");
     if (seccion) {
       setTimeout(() => seccion.scrollIntoView({ behavior: "smooth", block: "start" }), 180);
     }
 
+    /* Geocodificar y marcar en el mapa usando buscarDireccionEnMapa() de script.js */
+    const dirBusqueda = [calle, numero && numero !== "S/N" ? numero : "", localidad || MUNICIPIO]
+      .filter(Boolean).join(" ");
+    const campoBusq = document.getElementById("buscarDireccion");
+    if (campoBusq && typeof buscarDireccionEnMapa === "function") {
+      campoBusq.value = dirBusqueda;
+      setTimeout(() => buscarDireccionEnMapa(), 800);
+    }
+
     setStatus(
-      `✓ Datos cargados en el formulario: ${calle}${numero ? " " + numero : ""}${localidad ? ", " + localidad : ""}. Complete el mapa y genere el PDF.`,
+      `✓ Datos cargados en el formulario: ${calle}${numero ? " " + numero : ""}${localidad ? ", " + localidad : ""}. Buscando ubicación en el mapa…`,
       "ok"
     );
   }
