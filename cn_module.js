@@ -172,6 +172,54 @@
     );
   }
 
+  /* ── Descargar CIP pre-llenado ── */
+  async function descargarCipPreLlenado(rec) {
+    if (typeof XLSX === "undefined") {
+      alert("La librería de Excel aún no ha cargado. Espere un momento e intente nuevamente.");
+      return;
+    }
+
+    const { calle, numero, localidad } = parsearDireccion(rec.d);
+    const rol = String(rec.r || "").replace(/[,;\s]+$/, "");
+
+    try {
+      const res = await fetch("./img/doc/cip_base.xls");
+      if (!res.ok) throw new Error("No se pudo cargar el archivo CIP base.");
+      const buf = await res.arrayBuffer();
+
+      const wb = XLSX.read(new Uint8Array(buf), { type: "array", cellStyles: true });
+      const wsName = wb.SheetNames[0];
+      const ws = wb.Sheets[wsName];
+
+      const setCelda = (addr, valor, tipo) => {
+        if (!ws[addr]) ws[addr] = {};
+        ws[addr].v = valor;
+        ws[addr].t = tipo || "s";
+        ws[addr].w = String(valor);
+      };
+
+      /* Campos de sección 1 — Identificación de la propiedad */
+      if (calle)     setCelda("N19", calle.toUpperCase());
+      if (localidad) setCelda("D20", localidad.toUpperCase());
+      if (rol)       setCelda("D21", rol);
+      /* N° municipal (X21): DOM lo completa — dejamos vacío o con número de dirección */
+      if (numero && numero !== "S/N") setCelda("X21", numero);
+
+      /* Fecha de hoy como serial Excel */
+      const hoy = new Date();
+      const serial = Math.round((hoy - new Date(1899, 11, 30)) / 86400000);
+      if (ws["W9"]) { ws["W9"].v = serial; ws["W9"].t = "n"; ws["W9"].w = hoy.toLocaleDateString("es-CL"); }
+
+      /* Nombre del archivo */
+      const calleSlug = calle.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 20);
+      XLSX.writeFile(wb, `CIP_${calleSlug}_${rol || "SIN_ROL"}.xlsx`);
+
+    } catch (e) {
+      console.error(e);
+      alert("No se pudo generar el CIP. Verifique que el archivo cip_base.xls esté disponible.\n" + e.message);
+    }
+  }
+
   /* ── Renderizar resultados ── */
   function renderResultados(resultados) {
     const contenedor = document.getElementById("cn-resultados");
@@ -214,9 +262,13 @@
           ${numTexto}${locTexto}${rolTexto}
         </div>
         ${rec.m ? `<div class="cn-res-materia">${rec.m}${rec.f ? " · " + rec.f : ""}</div>` : ""}
-        <button class="btn btn-accent btn-sm cn-btn-sel">Cargar en formulario CIP →</button>
+        <div class="cn-res-acciones">
+          <button class="btn btn-accent btn-sm cn-btn-sel">Cargar en formulario →</button>
+          <button class="btn btn-outline btn-sm cn-btn-cip">Descargar CIP Excel</button>
+        </div>
       `;
       item.querySelector(".cn-btn-sel").addEventListener("click", () => precargarCip(rec));
+      item.querySelector(".cn-btn-cip").addEventListener("click", () => descargarCipPreLlenado(rec));
       contenedor.appendChild(item);
     });
   }
