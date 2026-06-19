@@ -183,49 +183,8 @@
   const burbuja = document.createElement("button");
   burbuja.id = "cb-burbuja";
   burbuja.setAttribute("aria-label","Abrir asistente virtual");
-  const SVG_MASCOTA = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <!-- Círculo exterior -->
-    <circle cx="32" cy="32" r="30" fill="#1a6dc8" stroke="#0d3a7a" stroke-width="2.5"/>
-    <!-- Fondo cielo -->
-    <circle cx="32" cy="32" r="27.5" fill="#5bbef7"/>
-    <!-- Nubes -->
-    <ellipse cx="19" cy="17" rx="5" ry="2.5" fill="white" opacity="0.9"/>
-    <ellipse cx="46" cy="15" rx="4" ry="2" fill="white" opacity="0.85"/>
-    <!-- Pasto -->
-    <ellipse cx="32" cy="57" rx="24" ry="7" fill="#4caf50"/>
-    <!-- Casa de fondo -->
-    <rect x="43" y="38" width="9" height="8" fill="#e53535"/>
-    <polygon points="43,38 52,38 47.5,32" fill="#c0392b"/>
-    <!-- Cuerpo del robot -->
-    <rect x="21" y="43" width="22" height="13" rx="3" fill="white" stroke="#1a6dc8" stroke-width="1.2"/>
-    <text x="32" y="51" text-anchor="middle" font-size="4.5" font-weight="900" fill="#0d3a7a" font-family="Arial,sans-serif">DOM</text>
-    <text x="32" y="55.5" text-anchor="middle" font-size="2.8" fill="#e53535" font-family="Arial,sans-serif">EN LÍNEA</text>
-    <!-- Brazo izquierdo levantado -->
-    <rect x="10" y="34" width="10" height="4.5" rx="2.2" fill="white" stroke="#1a6dc8" stroke-width="1" transform="rotate(-50,15,36)"/>
-    <circle cx="10" cy="27" r="4" fill="white" stroke="#1a6dc8" stroke-width="1"/>
-    <rect x="8.3" y="19" width="3.4" height="8" rx="1.7" fill="white" stroke="#1a6dc8" stroke-width="1"/>
-    <!-- Brazo derecho -->
-    <rect x="44" y="43" width="9" height="4" rx="2" fill="white" stroke="#1a6dc8" stroke-width="1"/>
-    <!-- Auriculares -->
-    <circle cx="17" cy="30" r="3.5" fill="#1a6dc8" stroke="#0a2a5e" stroke-width="1"/>
-    <circle cx="47" cy="30" r="3.5" fill="#1a6dc8" stroke="#0a2a5e" stroke-width="1"/>
-    <path d="M20.5 24 Q32 14 43.5 24" fill="none" stroke="#0d3a7a" stroke-width="2.5" stroke-linecap="round"/>
-    <!-- Cabeza: forma de casa (techo + cuerpo) -->
-    <polygon points="19,25 45,25 32,11" fill="#e53535" stroke="#c0392b" stroke-width="0.8"/>
-    <rect x="19" y="25" width="26" height="19" rx="2" fill="white" stroke="#ccc" stroke-width="0.5"/>
-    <!-- Pantalla facial azul -->
-    <rect x="21" y="26.5" width="22" height="16" rx="4" fill="#2f76ea"/>
-    <!-- Ojo izquierdo (guiñando) -->
-    <path d="M25.5 33 Q27.5 30.5 29.5 33" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-    <!-- Ojo derecho (abierto) -->
-    <circle cx="37" cy="32" r="3.5" fill="white"/>
-    <circle cx="37.7" cy="32.6" r="1.8" fill="#0d3a7a"/>
-    <circle cx="36.7" cy="31.5" r="0.8" fill="white"/>
-    <!-- Sonrisa -->
-    <path d="M26 39 Q32 44 38 39" fill="#e53535"/>
-    <path d="M26 39 Q32 44 38 39 Q32 42 26 39Z" fill="white"/>
-  </svg>`;
-  burbuja.innerHTML = SVG_MASCOTA + `<span class="cb-badge" aria-hidden="true"></span>`;
+  const IMG_MASCOTA = `<img src="img/imgChat.png" alt="Asistente DOM" style="width:64px;height:64px;object-fit:contain;display:block;" aria-hidden="true">`;
+  burbuja.innerHTML = IMG_MASCOTA + `<span class="cb-badge" aria-hidden="true"></span>`;
   document.body.appendChild(burbuja);
 
   const ventana = document.createElement("div");
@@ -254,7 +213,8 @@
     abierto = !abierto;
     ventana.classList.toggle("abierto", abierto);
     burbuja.querySelector(".cb-badge").style.display = "none";
-    burbuja.querySelector("svg").style.opacity = abierto ? "0.5" : "1";
+    const iconEl = burbuja.querySelector("img") || burbuja.querySelector("svg");
+    if (iconEl) iconEl.style.opacity = abierto ? "0.5" : "1";
     if (abierto && document.getElementById("cb-mensajes").children.length === 0) {
       FLUJO = construirFlujo();
       mostrarNodo("inicio");
