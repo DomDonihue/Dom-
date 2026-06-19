@@ -136,8 +136,12 @@
 
   /* ── estilos ── */
   const CSS = `
-    #cb-burbuja{position:fixed;bottom:28px;right:28px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#2f76ea,#5a9cff);color:#fff;border:none;cursor:pointer;box-shadow:0 6px 24px rgba(47,118,234,.45);display:flex;align-items:center;justify-content:center;font-size:1.5rem;z-index:9999;transition:transform .2s,box-shadow .2s}
-    #cb-burbuja:hover{transform:scale(1.08);box-shadow:0 8px 28px rgba(47,118,234,.55)}
+    #cb-burbuja{position:fixed;bottom:28px;right:28px;width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#0f3c68,#2f76ea);color:#fff;border:none;cursor:pointer;box-shadow:0 6px 24px rgba(47,118,234,.45);display:flex;align-items:center;justify-content:center;z-index:9999;transition:transform .2s,box-shadow .2s;padding:0;overflow:visible}
+    #cb-burbuja:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(47,118,234,.6)}
+    @keyframes cbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    #cb-burbuja{animation:cbFloat 3s ease-in-out infinite}
+    #cb-burbuja:hover{animation:none}
+    #cb-burbuja svg{width:64px;height:64px;display:block}
     #cb-burbuja .cb-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#ef4444;border-radius:50%;border:2px solid #fff;display:none}
     #cb-ventana{position:fixed;bottom:104px;right:28px;width:370px;max-width:calc(100vw - 32px);max-height:580px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(15,60,104,.18);display:flex;flex-direction:column;overflow:hidden;z-index:9998;border:1px solid #e3e8f0;transform:scale(.92) translateY(12px);opacity:0;pointer-events:none;transition:transform .22s cubic-bezier(.34,1.56,.64,1),opacity .18s ease}
     #cb-ventana.abierto{transform:scale(1) translateY(0);opacity:1;pointer-events:all}
@@ -179,7 +183,25 @@
   const burbuja = document.createElement("button");
   burbuja.id = "cb-burbuja";
   burbuja.setAttribute("aria-label","Abrir asistente virtual");
-  burbuja.innerHTML = `<span>💬</span><span class="cb-badge" aria-hidden="true"></span>`;
+  const SVG_MASCOTA = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <ellipse cx="32" cy="62" rx="20" ry="4" fill="#000" opacity="0.10"/>
+    <ellipse cx="32" cy="14" rx="22" ry="14" fill="#f59e0b"/>
+    <ellipse cx="32" cy="11" rx="18" ry="10" fill="#fbbf24"/>
+    <rect x="10" y="24" width="44" height="8" rx="4" fill="#d97706"/>
+    <rect x="14" y="20" width="36" height="7" rx="3.5" fill="#0f3c68"/>
+    <text x="32" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="900" fill="#fff" letter-spacing="1.5">DOM</text>
+    <circle cx="32" cy="43" r="18" fill="#fde68a"/>
+    <ellipse cx="23" cy="42" rx="4.5" ry="5" fill="#fff"/>
+    <circle cx="23" cy="43" r="3" fill="#1e40af"/>
+    <circle cx="24.2" cy="41.2" r="1.2" fill="#fff"/>
+    <ellipse cx="41" cy="42" rx="4.5" ry="5" fill="#fff"/>
+    <circle cx="41" cy="43" r="3" fill="#1e40af"/>
+    <circle cx="42.2" cy="41.2" r="1.2" fill="#fff"/>
+    <ellipse cx="21" cy="48" rx="4" ry="2.5" fill="#fca5a5" opacity="0.6"/>
+    <ellipse cx="43" cy="48" rx="4" ry="2.5" fill="#fca5a5" opacity="0.6"/>
+    <path d="M22 51 Q32 59 42 51" stroke="#d97706" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  </svg>`;
+  burbuja.innerHTML = SVG_MASCOTA + `<span class="cb-badge" aria-hidden="true"></span>`;
   document.body.appendChild(burbuja);
 
   const ventana = document.createElement("div");
@@ -188,7 +210,7 @@
   ventana.setAttribute("aria-label","Asistente DOM");
   ventana.innerHTML = `
     <div class="cb-header">
-      <div class="cb-avatar">🏛️</div>
+      <div class="cb-avatar"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" width="36" height="36" aria-hidden="true"><ellipse cx="20" cy="9" rx="14" ry="9" fill="#f59e0b"/><ellipse cx="20" cy="7" rx="11" ry="6.5" fill="#fbbf24"/><rect x="6" y="15" width="28" height="5" rx="2.5" fill="#d97706"/><rect x="9" y="12" width="22" height="5" rx="2.5" fill="#0f3c68"/><text x="20" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-size="4.5" font-weight="900" fill="#fff" letter-spacing="1">DOM</text><circle cx="20" cy="29" r="12" fill="#fde68a"/><ellipse cx="15" cy="27.5" rx="3" ry="3.3" fill="#fff"/><circle cx="15" cy="28.5" r="2" fill="#1e40af"/><circle cx="15.8" cy="27.2" r="0.8" fill="#fff"/><ellipse cx="25" cy="27.5" rx="3" ry="3.3" fill="#fff"/><circle cx="25" cy="28.5" r="2" fill="#1e40af"/><circle cx="25.8" cy="27.2" r="0.8" fill="#fff"/><ellipse cx="13.5" cy="31.5" rx="2.8" ry="1.8" fill="#fca5a5" opacity="0.6"/><ellipse cx="26.5" cy="31.5" rx="2.8" ry="1.8" fill="#fca5a5" opacity="0.6"/><path d="M14 33.5 Q20 38 26 33.5" stroke="#d97706" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
       <div class="cb-header-info">
         <strong>Asistente DOM</strong>
         <span>Municipalidad de ${muni}</span>
@@ -208,7 +230,7 @@
     abierto = !abierto;
     ventana.classList.toggle("abierto", abierto);
     burbuja.querySelector(".cb-badge").style.display = "none";
-    burbuja.querySelector("span:first-child").textContent = abierto ? "✕" : "💬";
+    burbuja.querySelector("svg").style.opacity = abierto ? "0.5" : "1";
     if (abierto && document.getElementById("cb-mensajes").children.length === 0) {
       FLUJO = construirFlujo();
       mostrarNodo("inicio");
