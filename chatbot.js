@@ -184,22 +184,20 @@
   burbuja.id = "cb-burbuja";
   burbuja.setAttribute("aria-label","Abrir asistente virtual");
   const SVG_MASCOTA = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <ellipse cx="32" cy="62" rx="20" ry="4" fill="#000" opacity="0.10"/>
-    <ellipse cx="32" cy="14" rx="22" ry="14" fill="#f59e0b"/>
-    <ellipse cx="32" cy="11" rx="18" ry="10" fill="#fbbf24"/>
-    <rect x="10" y="24" width="44" height="8" rx="4" fill="#d97706"/>
-    <rect x="14" y="20" width="36" height="7" rx="3.5" fill="#0f3c68"/>
-    <text x="32" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-size="7" font-weight="900" fill="#fff" letter-spacing="1.5">DOM</text>
-    <circle cx="32" cy="43" r="18" fill="#fde68a"/>
-    <ellipse cx="23" cy="42" rx="4.5" ry="5" fill="#fff"/>
-    <circle cx="23" cy="43" r="3" fill="#1e40af"/>
-    <circle cx="24.2" cy="41.2" r="1.2" fill="#fff"/>
-    <ellipse cx="41" cy="42" rx="4.5" ry="5" fill="#fff"/>
-    <circle cx="41" cy="43" r="3" fill="#1e40af"/>
-    <circle cx="42.2" cy="41.2" r="1.2" fill="#fff"/>
-    <ellipse cx="21" cy="48" rx="4" ry="2.5" fill="#fca5a5" opacity="0.6"/>
-    <ellipse cx="43" cy="48" rx="4" ry="2.5" fill="#fca5a5" opacity="0.6"/>
-    <path d="M22 51 Q32 59 42 51" stroke="#d97706" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <circle cx="32" cy="32" r="30" fill="#1355c7"/>
+    <circle cx="32" cy="32" r="30" fill="none" stroke="#0e3d9e" stroke-width="2"/>
+    <ellipse cx="22" cy="17" rx="13" ry="8" fill="#3a72e8" opacity="0.42"/>
+    <circle cx="20" cy="29" r="11" fill="white"/>
+    <circle cx="22" cy="31" r="6.5" fill="#1a1a3e"/>
+    <circle cx="17" cy="26" r="2.8" fill="white"/>
+    <circle cx="25" cy="35" r="1.2" fill="white" opacity="0.6"/>
+    <circle cx="44" cy="27" r="11" fill="white"/>
+    <circle cx="46" cy="29" r="6.5" fill="#1a1a3e"/>
+    <circle cx="41" cy="24" r="2.8" fill="white"/>
+    <circle cx="49" cy="33" r="1.2" fill="white" opacity="0.6"/>
+    <path d="M21 44 Q32 54 43 44" fill="#e53535"/>
+    <path d="M23 45 Q32 53 41 45 Q32 51 23 45" fill="white"/>
+    <ellipse cx="32" cy="49" rx="11" ry="4" fill="#cc2020" opacity="0.45"/>
   </svg>`;
   burbuja.innerHTML = SVG_MASCOTA + `<span class="cb-badge" aria-hidden="true"></span>`;
   document.body.appendChild(burbuja);
@@ -210,7 +208,7 @@
   ventana.setAttribute("aria-label","Asistente DOM");
   ventana.innerHTML = `
     <div class="cb-header">
-      <div class="cb-avatar"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" width="36" height="36" aria-hidden="true"><ellipse cx="20" cy="9" rx="14" ry="9" fill="#f59e0b"/><ellipse cx="20" cy="7" rx="11" ry="6.5" fill="#fbbf24"/><rect x="6" y="15" width="28" height="5" rx="2.5" fill="#d97706"/><rect x="9" y="12" width="22" height="5" rx="2.5" fill="#0f3c68"/><text x="20" y="17" text-anchor="middle" font-family="Arial,sans-serif" font-size="4.5" font-weight="900" fill="#fff" letter-spacing="1">DOM</text><circle cx="20" cy="29" r="12" fill="#fde68a"/><ellipse cx="15" cy="27.5" rx="3" ry="3.3" fill="#fff"/><circle cx="15" cy="28.5" r="2" fill="#1e40af"/><circle cx="15.8" cy="27.2" r="0.8" fill="#fff"/><ellipse cx="25" cy="27.5" rx="3" ry="3.3" fill="#fff"/><circle cx="25" cy="28.5" r="2" fill="#1e40af"/><circle cx="25.8" cy="27.2" r="0.8" fill="#fff"/><ellipse cx="13.5" cy="31.5" rx="2.8" ry="1.8" fill="#fca5a5" opacity="0.6"/><ellipse cx="26.5" cy="31.5" rx="2.8" ry="1.8" fill="#fca5a5" opacity="0.6"/><path d="M14 33.5 Q20 38 26 33.5" stroke="#d97706" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></div>
+      <div class="cb-avatar"><svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" width="36" height="36" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#1355c7"/><circle cx="20" cy="20" r="19" fill="none" stroke="#0e3d9e" stroke-width="1.5"/><ellipse cx="13" cy="10" rx="8" ry="5" fill="#3a72e8" opacity="0.42"/><circle cx="12" cy="18" r="7" fill="white"/><circle cx="13.5" cy="19.5" r="4" fill="#1a1a3e"/><circle cx="10.5" cy="16.5" r="1.8" fill="white"/><circle cx="27" cy="17" r="7" fill="white"/><circle cx="28.5" cy="18.5" r="4" fill="#1a1a3e"/><circle cx="25.5" cy="15.5" r="1.8" fill="white"/><path d="M13 28 Q20 34 27 28" fill="#e53535"/><path d="M14.5 29 Q20 33 25.5 29 Q20 32 14.5 29" fill="white"/><ellipse cx="20" cy="31" rx="7" ry="2.5" fill="#cc2020" opacity="0.4"/></svg></div>
       <div class="cb-header-info">
         <strong>Asistente DOM</strong>
         <span>Municipalidad de ${muni}</span>
