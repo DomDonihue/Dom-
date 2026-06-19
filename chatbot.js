@@ -136,13 +136,13 @@
 
   /* ── estilos ── */
   const CSS = `
-    #cb-burbuja{position:fixed;bottom:28px;right:28px;width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#0f3c68,#2f76ea);color:#fff;border:none;cursor:pointer;box-shadow:0 6px 24px rgba(47,118,234,.45);display:flex;align-items:center;justify-content:center;z-index:9999;transition:transform .2s,box-shadow .2s;padding:0;overflow:visible}
-    #cb-burbuja:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(47,118,234,.6)}
-    @keyframes cbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    #cb-burbuja{position:fixed;bottom:20px;right:20px;width:88px;height:88px;border-radius:50%;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:9999;transition:transform .2s;padding:0;overflow:visible;box-shadow:none}
+    #cb-burbuja:hover{transform:scale(1.08)}
+    @keyframes cbFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
     #cb-burbuja{animation:cbFloat 3s ease-in-out infinite}
-    #cb-burbuja:hover{animation:none}
-    #cb-burbuja svg{width:64px;height:64px;display:block}
-    #cb-burbuja .cb-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#ef4444;border-radius:50%;border:2px solid #fff;display:none}
+    #cb-burbuja:hover{animation:none;transform:scale(1.08)}
+    #cb-burbuja img{width:88px;height:88px;object-fit:contain;display:block;filter:drop-shadow(0 4px 12px rgba(15,60,104,.35))}
+    #cb-burbuja .cb-badge{position:absolute;top:4px;right:4px;width:16px;height:16px;background:#ef4444;border-radius:50%;border:2px solid #fff;display:none}
     #cb-ventana{position:fixed;bottom:104px;right:28px;width:370px;max-width:calc(100vw - 32px);max-height:580px;background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(15,60,104,.18);display:flex;flex-direction:column;overflow:hidden;z-index:9998;border:1px solid #e3e8f0;transform:scale(.92) translateY(12px);opacity:0;pointer-events:none;transition:transform .22s cubic-bezier(.34,1.56,.64,1),opacity .18s ease}
     #cb-ventana.abierto{transform:scale(1) translateY(0);opacity:1;pointer-events:all}
     .cb-header{background:linear-gradient(135deg,#0f3c68,#1a5ba8);padding:16px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0}
@@ -168,7 +168,7 @@
     .cb-typing span:nth-child(2){animation-delay:.2s}
     .cb-typing span:nth-child(3){animation-delay:.4s}
     @keyframes cbDot{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
-    @media(max-width:420px){#cb-ventana{right:12px;bottom:96px;width:calc(100vw - 24px)}#cb-burbuja{right:16px;bottom:20px}}
+    @media(max-width:420px){#cb-ventana{right:12px;bottom:108px;width:calc(100vw - 24px)}#cb-burbuja{right:10px;bottom:12px;width:72px;height:72px}#cb-burbuja img{width:72px;height:72px}}
     .cb-btn-home{border-color:#e2e8f0;color:#64748b;font-weight:600;margin-top:4px;border-style:dashed}
     .cb-btn-home:hover{background:#f8fafc;border-color:#94a3b8;color:#334155;transform:none}
   `;
