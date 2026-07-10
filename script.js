@@ -559,7 +559,7 @@ function actualizarEstadoFlujo() {
   const hayConsentimiento = !consentimientoRequerido || (chkConsent ? chkConsent.checked : false);
   const ok = hayUbicacion && hayConsentimiento;
 
-  ["btnGuardarDatos","btnGenerarPdf","btnImprimirPdf","btnEnviarEmail"].forEach(id => {
+  ["btnGuardarDatos","btnGenerarPdf","btnImprimirPdf"].forEach(id => {
     const b = document.getElementById(id);
     if (b) b.disabled = !ok;
   });
@@ -610,16 +610,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnImp = document.getElementById("btnImprimirPdf");
   if (btnImp) btnImp.addEventListener("click", () => generarPdfCip(true));
 
-  const btnEmail = document.getElementById("btnEnviarEmail");
-  if (btnEmail) btnEmail.addEventListener("click", enviarFormularioPorEmail);
-
-  document.getElementById("btnCerrarModalEmail")?.addEventListener("click", function () {
-    document.getElementById("modalEmailOk").style.display = "none";
-    limpiarFormulario();
-  });
-  document.getElementById("btnCerrarModalError")?.addEventListener("click", function () {
-    document.getElementById("modalEmailError").style.display = "none";
-  });
 
   const btnLimpiarLimites = document.getElementById("btnLimpiarLimites");
   if (btnLimpiarLimites) {
@@ -854,7 +844,10 @@ async function generarPdfCip(imprimir=false) {
       const w = window.open(url,"_blank");
       if (w) { w.onload = function(){ w.print(); URL.revokeObjectURL(url); setTimeout(limpiarFormulario,1500); }; }
     } else {
-      const a = document.createElement("a"); a.href=url; a.download=`formulario_cip_${Date.now()}.pdf`;
+      const tipo  = (obtenerValor("tipoCertificado") || "CERT").replace(/[^a-zA-Z0-9]/g,"_");
+      const rol   = (obtenerValor("rolSii") || "SIN_ROL").replace(/[^a-zA-Z0-9\-]/g,"_");
+      const fecha = new Date().toISOString().slice(0,10);
+      const a = document.createElement("a"); a.href=url; a.download=`${tipo}_${rol}_${fecha}.pdf`;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(function(){ URL.revokeObjectURL(url); limpiarFormulario(); }, 1500);
     }
@@ -952,105 +945,6 @@ function activarOpcionSinNumero() {
   });
 }
 
-/* ================================================================
-   ENVÍO POR CORREO CON PDF ADJUNTO — EmailJS
-   Requiere configurar emailjs.publicKey / serviceId / templateId
-   en config.js. Cuenta gratuita: https://www.emailjs.com
-   ================================================================ */
-async function enviarFormularioPorEmail() {
-  if (!validarFormularioCip()) return;
-
-  const emailCfg = cfg("envioEmail", {});
-  if (!emailCfg.habilitado) {
-    alert("El envío por correo no está habilitado en la configuración.");
-    return;
-  }
-
-  const ejsCfg = emailCfg.emailjs || {};
-  if (!ejsCfg.publicKey || !ejsCfg.serviceId || !ejsCfg.templateId) {
-    alert(
-      "Para enviar por correo debe configurar EmailJS en config.js.\n\n" +
-      "1. Cree cuenta en emailjs.com (gratis)\n" +
-      "2. Conecte su correo en Email Services\n" +
-      "3. Cree una plantilla en Email Templates\n" +
-      "4. Copie publicKey, serviceId y templateId en config.js → envioEmail.emailjs"
-    );
-    return;
-  }
-
-  const btn          = document.getElementById("btnEnviarEmail");
-  const textoOriginal = btn ? btn.textContent : "";
-
-  const selTipo   = document.getElementById("tipoCertificado");
-  const tipoTexto = selTipo ? selTipo.options[selTipo.selectedIndex]?.text : obtenerValor("tipoCertificado");
-  const nombre    = obtenerValor("nombre");
-
-  let form = null;
-  try {
-    if (btn) { btn.disabled = true; btn.textContent = "⏳ Generando PDF..."; }
-
-    const pdfBytes = await construirBytesPdfCip();
-
-    if (btn) btn.textContent = "⏳ Enviando correo...";
-
-    /* Construir un <form> en memoria para emailjs.sendForm() */
-    form = document.createElement("form");
-
-    const campo = (name, value) => {
-      const inp = document.createElement("input");
-      inp.type = "hidden"; inp.name = name; inp.value = String(value || "");
-      form.appendChild(inp);
-    };
-
-    campo("asunto",           `Solicitud DOM en Línea — ${tipoTexto} — ${nombre}`);
-    campo("nombre",           nombre);
-    campo("rut",              obtenerValor("rut"));
-    campo("email_solicitante",obtenerValor("email") || "(no indicado)");
-    campo("telefono",         obtenerValor("telefono") || "(no indicado)");
-    campo("tipo_certificado", tipoTexto);
-    campo("zona",             obtenerValor("zona"));
-    campo("calle",            obtenerValor("calle"));
-    campo("numero",           obtenerValor("numero"));
-    campo("localidad",        obtenerValor("localidad"));
-    campo("rol_sii",          obtenerValor("rolSii"));
-    campo("coordenadas",      [obtenerValor("latitud"), obtenerValor("longitud")].filter(Boolean).join(", ") || "-");
-    campo("fecha_hora",       new Date().toLocaleString("es-CL"));
-    campo("to_email",         emailCfg.destinatario || "dom@mdonihue.cl");
-
-    /* Adjuntar el PDF como archivo */
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.name = "attachment";
-    form.appendChild(fileInput);
-    const dt = new DataTransfer();
-    const nombreArchivo = `solicitud_dom_${nombre.replace(/\s+/g,"_")}_${Date.now()}.pdf`;
-    dt.items.add(new File([pdfBytes], nombreArchivo, { type: "application/pdf" }));
-    fileInput.files = dt.files;
-
-    document.body.appendChild(form);
-
-    await emailjs.sendForm(ejsCfg.serviceId, ejsCfg.templateId, form, { publicKey: ejsCfg.publicKey });
-
-    document.body.removeChild(form);
-
-    /* Éxito */
-    const destEl = document.getElementById("modalEmailDest");
-    if (destEl) destEl.textContent = emailCfg.destinatario || "dom@mdonihue.cl";
-    document.getElementById("modalEmailOk").style.display = "flex";
-    actualizarPaso("pasoFormulario","completado");
-    actualizarPaso("pasoPdf","completado");
-
-  } catch (err) {
-    console.error("Error al enviar email:", err);
-    const detEl = document.getElementById("modalErrorDetalle");
-    if (detEl) detEl.textContent = err?.text || err?.message || "Error de conexión. Intente nuevamente.";
-    document.getElementById("modalEmailError").style.display = "flex";
-    if (form && form.parentNode) document.body.removeChild(form);
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
-    actualizarEstadoFlujo();
-  }
-}
 
 /* ================================================================
    LIMPIAR FORMULARIO — reset completo tras generar PDF

@@ -252,7 +252,6 @@
             <button type="button" class="btn btn-accent"   id="btnGuardarDatos"  disabled>Validar datos</button>
             <button type="button" class="btn btn-accent"   id="btnGenerarPdf"    disabled>Descargar formulario PDF</button>
             <button type="button" class="btn btn-outline"  id="btnImprimirPdf"   disabled>Imprimir formulario</button>
-            <button type="button" class="btn btn-success"  id="btnEnviarEmail"   disabled>📧 Enviar solicitud por correo</button>
           </div>
         </form>
       </div>
@@ -311,29 +310,7 @@
     </div>
   </footer>
 
-  <!-- MODAL ENVÍO POR CORREO -->
-  <div id="modalEmailOk" class="modal-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="modalEmailTitulo">
-    <div class="modal-box">
-      <div class="modal-icon modal-icon-ok">📧</div>
-      <h3 id="modalEmailTitulo">¡Solicitud enviada!</h3>
-      <p>Su solicitud fue enviada correctamente a <strong id="modalEmailDest"></strong></p>
-      <p class="modal-sub">Recibirá respuesta según los plazos de cada certificado (normalmente 7 días hábiles).</p>
-      <button class="btn btn-accent btn-lg" id="btnCerrarModalEmail">Cerrar</button>
-    </div>
-  </div>
-
-  <div id="modalEmailError" class="modal-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="modalErrorTitulo">
-    <div class="modal-box">
-      <div class="modal-icon modal-icon-error">⚠️</div>
-      <h3 id="modalErrorTitulo">No se pudo enviar</h3>
-      <p>Hubo un problema al enviar la solicitud. Por favor intente nuevamente o descargue el formulario PDF.</p>
-      <p class="modal-sub" id="modalErrorDetalle"></p>
-      <button class="btn btn-accent btn-lg" id="btnCerrarModalError">Cerrar</button>
-    </div>
-  </div>
-
   <!-- SCRIPTS -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet-draw@1.0.4/dist/leaflet.draw.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
