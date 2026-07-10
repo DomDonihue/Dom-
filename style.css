@@ -155,6 +155,65 @@ img {
   color: white;
 }
 
+.btn-success {
+  background: linear-gradient(135deg, #18a06a, #22c47e);
+  color: #fff;
+}
+.btn-success:hover {
+  background: linear-gradient(135deg, #12865a, #18a06a);
+  transform: translateY(-1px);
+}
+.btn-success:disabled {
+  background: #a8cfc0;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 25, 50, 0.72);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(4px);
+}
+.modal-box {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 36px 36px;
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(10, 25, 50, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+.modal-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+.modal-box h3 {
+  font-size: 1.45rem;
+  color: #0f3c68;
+  margin: 0;
+}
+.modal-box p {
+  font-size: 0.97rem;
+  color: #3a4e65;
+  margin: 0;
+  line-height: 1.6;
+}
+.modal-sub {
+  font-size: 0.85rem !important;
+  color: #6a7e95 !important;
+}
+
 /* HERO */
 .hero {
   position: relative;
@@ -1483,6 +1542,17 @@ img {
 .cn-status-error { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
 
 /* Resultados */
+.cn-resultados {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 8px;
+  margin-right: -8px;
+}
+.cn-resultados::-webkit-scrollbar { width: 8px; }
+.cn-resultados::-webkit-scrollbar-track { background: transparent; }
+.cn-resultados::-webkit-scrollbar-thumb { background: var(--line); border-radius: 99px; }
+.cn-resultados::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
 .cn-resultado-item {
   border: 1.5px solid var(--line);
   border-radius: 12px;
@@ -1570,4 +1640,78 @@ img {
   margin-top: 6px;
 }
 .cn-no-encontrado p { margin-bottom: 10px; }
+
+/* ================================================================
+   MODO TÓTEM — fuentes más grandes para pantalla de escritorio en
+   estructura física. Activar con modoTotem.activo: true en config.js
+   ================================================================ */
+body.modo-totem {
+  font-size: var(--totem-base, 20px);
+}
+
+/* Inputs y selects */
+body.modo-totem .form-group input,
+body.modo-totem .form-group select,
+body.modo-totem .map-search input {
+  padding: 14px 16px;
+  font-size: 1rem;
+  border-radius: 14px;
+}
+
+/* Labels de formulario */
+body.modo-totem .form-group label {
+  font-size: 0.95rem;
+}
+
+/* Botones de acción del formulario */
+body.modo-totem .btn {
+  padding: 14px 22px;
+  font-size: 1rem;
+}
+body.modo-totem .btn-lg {
+  padding: 18px 30px;
+  font-size: 1.05rem;
+}
+body.modo-totem .btn-sm {
+  padding: 8px 16px;
+  font-size: 0.88rem;
+}
+
+/* Accordion */
+body.modo-totem .accordion-title    { font-size: 1.28rem; }
+body.modo-totem .accordion-subtitle { font-size: 1rem; }
+body.modo-totem .accordion-header   { padding: 22px 24px; }
+
+/* Consentimiento */
+body.modo-totem .consent-label {
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+body.modo-totem .consent-label input[type="checkbox"] {
+  width: 20px !important;
+  height: 20px;
+}
+
+/* FAQ */
+body.modo-totem .faq-pregunta { font-size: 1.05rem; }
+body.modo-totem .faq-respuesta { font-size: 0.97rem; }
+
+/* Menú nav */
+body.modo-totem .menu a { font-size: 1rem; }
+
+/* Textos de ayuda del formulario */
+body.modo-totem .form-help        { font-size: 0.96rem; }
+body.modo-totem .coordenadas-box  { font-size: 0.96rem; }
+body.modo-totem .zona-detectada-panel { font-size: 0.94rem; padding: 11px 16px; }
+
+/* Paso-etiqueta y estado */
+body.modo-totem .paso-etiqueta { font-size: 0.82rem; }
+body.modo-totem .solicitud-card h3 { font-size: 1.45rem; }
+
+/* Busqueda CN */
+body.modo-totem .cn-input { font-size: 1rem; padding: 13px 16px; }
+
+/* Mini-cards recursos */
+body.modo-totem .mini-card h3 { font-size: 1.15rem; }
+body.modo-totem .mini-card p  { font-size: 0.95rem; }
 

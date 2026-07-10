@@ -21,6 +21,14 @@ function cfgContacto(clave, def) {
 /* ── aplicar config al DOM al cargar ── */
 document.addEventListener("DOMContentLoaded", function () {
 
+  /* modo tótem — fuentes grandes */
+  const totem = cfg("modoTotem", {});
+  if (totem.activo) {
+    document.body.classList.add("modo-totem");
+    const px = totem.fontBasePixels || 20;
+    document.documentElement.style.setProperty("--totem-base", px + "px");
+  }
+
   /* título pestaña */
   const titulo = cfg("tituloPagina", "DOM en Línea");
   document.title = titulo;
@@ -551,7 +559,7 @@ function actualizarEstadoFlujo() {
   const hayConsentimiento = !consentimientoRequerido || (chkConsent ? chkConsent.checked : false);
   const ok = hayUbicacion && hayConsentimiento;
 
-  ["btnGuardarDatos","btnGenerarPdf","btnImprimirPdf"].forEach(id => {
+  ["btnGuardarDatos","btnGenerarPdf","btnImprimirPdf","btnEnviarEmail"].forEach(id => {
     const b = document.getElementById(id);
     if (b) b.disabled = !ok;
   });
@@ -601,6 +609,17 @@ document.addEventListener("DOMContentLoaded", function () {
   if (btnPdf) btnPdf.addEventListener("click", () => generarPdfCip(false));
   const btnImp = document.getElementById("btnImprimirPdf");
   if (btnImp) btnImp.addEventListener("click", () => generarPdfCip(true));
+
+  const btnEmail = document.getElementById("btnEnviarEmail");
+  if (btnEmail) btnEmail.addEventListener("click", enviarFormularioPorEmail);
+
+  document.getElementById("btnCerrarModalEmail")?.addEventListener("click", function () {
+    document.getElementById("modalEmailOk").style.display = "none";
+    limpiarFormulario();
+  });
+  document.getElementById("btnCerrarModalError")?.addEventListener("click", function () {
+    document.getElementById("modalEmailError").style.display = "none";
+  });
 
   const btnLimpiarLimites = document.getElementById("btnLimpiarLimites");
   if (btnLimpiarLimites) {
@@ -698,13 +717,10 @@ const CHECKBOXES_PDF = {
   RURAL:                { x: 266, y: 650 }
 };
 
-async function generarPdfCip(imprimir=false) {
-  if (!validarFormularioCip()) return;
-  actualizarPaso("pasoFormulario","completado");
-  actualizarPaso("pasoPdf","activo");
-  try {
-    const { PDFDocument, rgb, StandardFonts } = PDFLib;
-    const pdfDoc  = await PDFDocument.load(await cargarPdfBaseCip());
+/* Genera el PDF y devuelve los bytes (Uint8Array). Lanzará error si algo falla. */
+async function construirBytesPdfCip() {
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+  const pdfDoc  = await PDFDocument.load(await cargarPdfBaseCip());
     const pagina  = pdfDoc.getPages()[0];
     const font    = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const fontB   = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -823,8 +839,17 @@ async function generarPdfCip(imprimir=false) {
       escribir(textoConsent, posConsent.x, posConsent.y, posConsent.size||6.5, posConsent.bold===true);
     }
 
-    const blob = new Blob([await pdfDoc.save()],{type:"application/pdf"});
-    const url  = URL.createObjectURL(blob);
+  return await pdfDoc.save();
+}
+
+async function generarPdfCip(imprimir=false) {
+  if (!validarFormularioCip()) return;
+  actualizarPaso("pasoFormulario","completado");
+  actualizarPaso("pasoPdf","activo");
+  try {
+    const bytes = await construirBytesPdfCip();
+    const blob  = new Blob([bytes],{type:"application/pdf"});
+    const url   = URL.createObjectURL(blob);
     if (imprimir) {
       const w = window.open(url,"_blank");
       if (w) { w.onload = function(){ w.print(); URL.revokeObjectURL(url); setTimeout(limpiarFormulario,1500); }; }
@@ -925,6 +950,106 @@ function activarOpcionSinNumero() {
     if(this.checked){inp.value="S/N";inp.readOnly=true;}
     else{if(inp.value.trim().toUpperCase()==="S/N")inp.value="";inp.readOnly=false;inp.focus();}
   });
+}
+
+/* ================================================================
+   ENVÍO POR CORREO CON PDF ADJUNTO — EmailJS
+   Requiere configurar emailjs.publicKey / serviceId / templateId
+   en config.js. Cuenta gratuita: https://www.emailjs.com
+   ================================================================ */
+async function enviarFormularioPorEmail() {
+  if (!validarFormularioCip()) return;
+
+  const emailCfg = cfg("envioEmail", {});
+  if (!emailCfg.habilitado) {
+    alert("El envío por correo no está habilitado en la configuración.");
+    return;
+  }
+
+  const ejsCfg = emailCfg.emailjs || {};
+  if (!ejsCfg.publicKey || !ejsCfg.serviceId || !ejsCfg.templateId) {
+    alert(
+      "Para enviar por correo debe configurar EmailJS en config.js.\n\n" +
+      "1. Cree cuenta en emailjs.com (gratis)\n" +
+      "2. Conecte su correo en Email Services\n" +
+      "3. Cree una plantilla en Email Templates\n" +
+      "4. Copie publicKey, serviceId y templateId en config.js → envioEmail.emailjs"
+    );
+    return;
+  }
+
+  const btn          = document.getElementById("btnEnviarEmail");
+  const textoOriginal = btn ? btn.textContent : "";
+
+  const selTipo   = document.getElementById("tipoCertificado");
+  const tipoTexto = selTipo ? selTipo.options[selTipo.selectedIndex]?.text : obtenerValor("tipoCertificado");
+  const nombre    = obtenerValor("nombre");
+
+  let form = null;
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = "⏳ Generando PDF..."; }
+
+    const pdfBytes = await construirBytesPdfCip();
+
+    if (btn) btn.textContent = "⏳ Enviando correo...";
+
+    /* Construir un <form> en memoria para emailjs.sendForm() */
+    form = document.createElement("form");
+
+    const campo = (name, value) => {
+      const inp = document.createElement("input");
+      inp.type = "hidden"; inp.name = name; inp.value = String(value || "");
+      form.appendChild(inp);
+    };
+
+    campo("asunto",           `Solicitud DOM en Línea — ${tipoTexto} — ${nombre}`);
+    campo("nombre",           nombre);
+    campo("rut",              obtenerValor("rut"));
+    campo("email_solicitante",obtenerValor("email") || "(no indicado)");
+    campo("telefono",         obtenerValor("telefono") || "(no indicado)");
+    campo("tipo_certificado", tipoTexto);
+    campo("zona",             obtenerValor("zona"));
+    campo("calle",            obtenerValor("calle"));
+    campo("numero",           obtenerValor("numero"));
+    campo("localidad",        obtenerValor("localidad"));
+    campo("rol_sii",          obtenerValor("rolSii"));
+    campo("coordenadas",      [obtenerValor("latitud"), obtenerValor("longitud")].filter(Boolean).join(", ") || "-");
+    campo("fecha_hora",       new Date().toLocaleString("es-CL"));
+    campo("to_email",         emailCfg.destinatario || "dom@mdonihue.cl");
+
+    /* Adjuntar el PDF como archivo */
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.name = "attachment";
+    form.appendChild(fileInput);
+    const dt = new DataTransfer();
+    const nombreArchivo = `solicitud_dom_${nombre.replace(/\s+/g,"_")}_${Date.now()}.pdf`;
+    dt.items.add(new File([pdfBytes], nombreArchivo, { type: "application/pdf" }));
+    fileInput.files = dt.files;
+
+    document.body.appendChild(form);
+
+    await emailjs.sendForm(ejsCfg.serviceId, ejsCfg.templateId, form, { publicKey: ejsCfg.publicKey });
+
+    document.body.removeChild(form);
+
+    /* Éxito */
+    const destEl = document.getElementById("modalEmailDest");
+    if (destEl) destEl.textContent = emailCfg.destinatario || "dom@mdonihue.cl";
+    document.getElementById("modalEmailOk").style.display = "flex";
+    actualizarPaso("pasoFormulario","completado");
+    actualizarPaso("pasoPdf","completado");
+
+  } catch (err) {
+    console.error("Error al enviar email:", err);
+    const detEl = document.getElementById("modalErrorDetalle");
+    if (detEl) detEl.textContent = err?.text || err?.message || "Error de conexión. Intente nuevamente.";
+    document.getElementById("modalEmailError").style.display = "flex";
+    if (form && form.parentNode) document.body.removeChild(form);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = textoOriginal; }
+    actualizarEstadoFlujo();
+  }
 }
 
 /* ================================================================

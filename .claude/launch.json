@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pagina-dom",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "52000", "."],
+      "port": 52000
+    }
+  ]
+}

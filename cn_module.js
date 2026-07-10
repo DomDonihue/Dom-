@@ -87,24 +87,46 @@
   }
 
   /* ── búsqueda ── */
+  let _buscarTotal = 0; // total de coincidencias de la última búsqueda
+
   function buscar(termino) {
     if (!DATOS || !DATOS.registros) return [];
     const t  = normalizar(termino);
     const tr = normalRol(termino);
-    return DATOS.registros
+    if (!t) { _buscarTotal = 0; return []; }
+
+    /* Si el término tiene formato ROL (solo dígitos y guión), buscar solo por ROL */
+    const esRol = /^\d{1,4}(-\d{0,4})?$/.test(termino.trim());
+
+    /* Tokens individuales de al menos 3 caracteres para nombre/dirección */
+    const tokens = t.split(/\s+/).filter(tok => tok.length >= 3);
+
+    _buscarTotal = 0;
+    const todos = DATOS.registros
       .map(rec => {
         let score = 0;
         const rolN = normalRol(rec.r || "");
+
+        /* Coincidencia por ROL */
         if (rolN && rolN === tr)               score += 100;
-        else if (rolN && rolN.includes(tr))    score += 60;
-        if (normalizar(rec.n).includes(t))     score += 40;
-        if (normalizar(rec.d || "").includes(t)) score += 30;
+        else if (rolN && rolN.startsWith(tr))  score +=  80;
+        else if (rolN && rolN.includes(tr))    score +=  60;
+
+        /* Coincidencia por nombre/dirección (solo si NO es formato ROL) */
+        if (!esRol && tokens.length > 0) {
+          const nombreN = normalizar(rec.n);
+          const dirN    = normalizar(rec.d || "");
+          /* TODAS las palabras del término deben estar presentes en el campo */
+          if (tokens.every(tok => nombreN.includes(tok))) score += 40;
+          if (tokens.every(tok => dirN.includes(tok)))    score += 30;
+        }
+
         return { rec, score };
       })
-      .filter(x => x.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 30)
-      .map(x => x.rec);
+      .filter(x => { if (x.score > 0) { _buscarTotal++; return true; } return false; })
+      .sort((a, b) => b.score - a.score);
+
+    return todos.slice(0, 30).map(x => x.rec);
   }
 
   /* ── UI helpers ── */
@@ -244,7 +266,10 @@
       return;
     }
 
-    setStatus(`${resultados.length} resultado(s). Seleccione el predio para cargar los datos en el formulario.`, "info");
+    const msgTotal = _buscarTotal > 30
+      ? `Mostrando 30 de ${_buscarTotal} coincidencias. Refine su búsqueda para mejores resultados.`
+      : `${resultados.length} resultado(s). Seleccione el predio para cargar los datos en el formulario.`;
+    setStatus(msgTotal, _buscarTotal > 30 ? "warn" : "info");
 
     resultados.forEach(rec => {
       const { calle, numero, localidad } = parsearDireccion(rec.d);
@@ -295,17 +320,37 @@
 
   /* ── Init ── */
   function init() {
-    const inputBusq = document.getElementById("cn-busqueda");
-    const btnBuscar = document.getElementById("cn-btn-buscar");
+    const inputBusq  = document.getElementById("cn-busqueda");
+    const btnBuscar  = document.getElementById("cn-btn-buscar");
+    const btnLimpiar = document.getElementById("cn-btn-limpiar");
 
     if (btnBuscar) {
       btnBuscar.addEventListener("click", () => {
         const termino = inputBusq ? inputBusq.value.trim() : "";
         if (!termino) { setStatus("Ingrese nombre, ROL o dirección para buscar.", "warn"); return; }
+        /* Advertir si el término es muy corto para búsqueda por texto (no ROL) */
+        const esRolInput = /^\d{1,4}(-\d{0,4})?$/.test(termino);
+        if (!esRolInput && termino.replace(/\s+/g, "").length < 3) {
+          setStatus("Ingrese al menos 3 caracteres para buscar por nombre o dirección.", "warn");
+          return;
+        }
         cargarDatos(err => {
           if (err) { setStatus("Error al cargar la base de datos.", "error"); return; }
-          renderResultados(buscar(termino));
+          const resultados = buscar(termino);
+          renderResultados(resultados);
+          if (btnLimpiar) btnLimpiar.style.display = "inline-flex";
         });
+      });
+    }
+
+    if (btnLimpiar) {
+      btnLimpiar.addEventListener("click", () => {
+        if (inputBusq) inputBusq.value = "";
+        setStatus("", "info");
+        const contenedor = document.getElementById("cn-resultados");
+        if (contenedor) contenedor.innerHTML = "";
+        btnLimpiar.style.display = "none";
+        if (inputBusq) inputBusq.focus();
       });
     }
 

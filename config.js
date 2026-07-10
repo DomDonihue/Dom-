@@ -256,19 +256,15 @@ window.DOM_CONFIG = {
      ============================================================ */
 
   consentimiento: {
-    requerido:           true,   // false → salta el checkbox (municipios sin requerimiento)
-    textoConsentimiento: "Autorizo a la Ilustre Municipalidad de {municipalidad} a tratar mis datos personales, incluido mi RUT, para la gestión de esta solicitud, conforme a la",
+    requerido:           true,
+    textoConsentimiento: "Autorizo a Ilustre Municipalidad de {municipalidad} a tratar los siguientes datos personales (Nombre Completo - RUT - Correo Electrónico - Teléfono - Coordenadas GPS del Predio - Dirección del Predio) con el fin exclusivo de gestionar esta solicitud. Este sitio utiliza servicios externos de geolocalización (OpenStreetMap y Google Maps) que procesan las coordenadas del predio; dichos datos no son almacenados en servidores municipales. Conforme a la",
     leyes: [
       {
-        texto: "Ley N° 19.628 sobre Protección de la Vida Privada",
+        texto: "Ley N° 19.628 de Protección de Datos Personales y sus modificaciones (Ley N° 21.719.)",
         url:   "https://www.bcn.cl/leychile/navegar?idNorma=141599"
-      },
-      {
-        texto: "Ley N° 21.719 sobre Protección de Datos Personales",
-        url:   "https://www.bcn.cl/leychile/navegar?idNorma=1197098"
       }
     ],
-    registrarEnPdf:      true,   // imprime fecha/hora de aceptación en el PDF generado
+    registrarEnPdf:      true,
     avisoPreparacion:    "DOCUMENTO DE PREPARACIÓN — No válido como solicitud oficial. Debe ingresar en domenlinea.minvu.cl"
   },
 
@@ -276,6 +272,17 @@ window.DOM_CONFIG = {
   /* ============================================================
      10. MAPA (Leaflet + Nominatim)
      ============================================================ */
+
+  /* ============================================================
+     10b. MODO TÓTEM
+     activo: true  → activa fuentes grandes y clase CSS modo-totem
+     fontBasePixels: tamaño de fuente base (17 = web normal, 20 = tótem)
+     ============================================================ */
+  modoTotem: {
+    activo:         true,
+    fontBasePixels: 20
+  },
+
 
   comunaBusqueda:          "Doñihue",
   regionBusqueda:          "Región del Libertador General Bernardo O'Higgins",
@@ -293,6 +300,42 @@ window.DOM_CONFIG = {
   /* ============================================================
      11. PDF BASE (Certificado de Informaciones Previas)
      ============================================================ */
+
+  /* ============================================================
+     11b. ENVÍO POR CORREO
+     --------------------------------------------------------------
+     Usa FormSubmit.co (gratuito, sin backend).
+     PRIMER USO: al enviar el primer formulario, FormSubmit enviará
+     un correo de activación a "destinatario". Debe hacer clic en
+     el enlace de ese correo una sola vez para activar el servicio.
+     ============================================================ */
+
+  /* ============================================================
+     11b. ENVÍO POR CORREO — EmailJS (gratuito hasta 200/mes)
+     --------------------------------------------------------------
+     Pasos para activar:
+     1. Crear cuenta en https://www.emailjs.com (gratis)
+     2. Email Services → conectar Gmail/Outlook → copiar Service ID
+     3. Email Templates → crear plantilla → copiar Template ID
+        Variables que usa la plantilla:
+          {{asunto}}  {{nombre}}  {{rut}}  {{email_solicitante}}
+          {{telefono}} {{tipo_certificado}} {{zona}} {{calle}}
+          {{numero}}  {{localidad}} {{rol_sii}} {{coordenadas}}
+          {{fecha_hora}}  — y el PDF llega como adjunto automático
+     4. My Account → API Keys → copiar Public Key
+     5. Pegar los tres valores abajo y guardar.
+     ============================================================ */
+
+  envioEmail: {
+    habilitado:    true,
+    destinatario:  "dom@mdonihue.cl",
+    emailjs: {
+      publicKey:  "",   // My Account → API Keys → Public Key
+      serviceId:  "",   // Email Services → Service ID
+      templateId: ""    // Email Templates → Template ID
+    }
+  },
+
 
   rutasPdfCip: [
     "./img/doc/formulario.pdf"
@@ -329,7 +372,10 @@ window.DOM_CONFIG = {
 
     municipalidadComprobante: { x: 256, y: 155, size: 9, bold: true,  max: 35 },
     calleComprobante:         { x: 200,  y: 50, size: 8, bold: false, max: 65 },
-    numeroComprobante:        { x: 500, y: 50, size: 8, bold: false, max: 15 }
+    numeroComprobante:        { x: 500, y: 50, size: 8, bold: false, max: 15 },
+
+    /* Texto de autorización de datos — posicionar debajo de la fila CALLE (y:50) */
+    consentimientoPdf:        { x: 55,  y: 28, size: 6.5, bold: false, max: 130 }
   }
 
 }; /* fin window.DOM_CONFIG */
