@@ -1596,6 +1596,16 @@ img {
   color: var(--muted);
   margin-bottom: 8px;
 }
+.cn-res-detalle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.cn-det-tipo  { font-size: 0.75rem; font-weight: 600; color: #374151; background: #f3f4f6; padding: 2px 8px; border-radius: 6px; }
+.cn-det-fecha { font-size: 0.73rem; color: var(--muted); background: #f9fafb; padding: 2px 8px; border-radius: 6px; }
+.cn-det-sup   { font-size: 0.73rem; color: #065f46; background: #d1fae5; padding: 2px 8px; border-radius: 6px; }
+.cn-det-rec   { font-size: 0.73rem; color: #1e40af; background: #dbeafe; padding: 2px 8px; border-radius: 6px; }
 
 /* Chips / tags */
 .cn-chip, .cn-tag {

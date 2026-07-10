@@ -276,11 +276,20 @@
       const item = document.createElement("div");
       item.className = "cn-resultado-item";
 
-      const numTexto  = (numero && numero !== "S/N") ? `<span class="cn-tag cn-tag-num">N° ${numero}</span>` : (numero === "S/N" ? `<span class="cn-tag cn-tag-num">S/N</span>` : "");
-      const locTexto  = localidad ? `<span class="cn-tag cn-tag-loc">${localidad}</span>` : "";
-      const rolLimpio = String(rec.r || "").replace(/[,;\s]+$/, "");
-      const rolTexto  = rolLimpio ? `<span class="cn-tag cn-tag-rol">ROL ${rolLimpio}</span>` : "";
+      const numTexto   = (numero && numero !== "S/N") ? `<span class="cn-tag cn-tag-num">N° ${numero}</span>` : (numero === "S/N" ? `<span class="cn-tag cn-tag-num">S/N</span>` : "");
+      const locTexto   = localidad ? `<span class="cn-tag cn-tag-loc">${localidad}</span>` : "";
+      const rolLimpio  = String(rec.r || "").replace(/[,;\s]+$/, "");
+      const rolTexto   = rolLimpio ? `<span class="cn-tag cn-tag-rol">ROL ${rolLimpio}</span>` : "";
       const fuenteChip = chipFuente(rec.src);
+
+      /* Detalle del trámite */
+      const recepcion  = String(rec.rec || "").trim();
+      const superficie = String(rec.s   || "").trim();
+      const detalles   = [];
+      if (rec.m)       detalles.push(`<span class="cn-det-tipo">${rec.m}</span>`);
+      if (rec.f)       detalles.push(`<span class="cn-det-fecha">${rec.f}</span>`);
+      if (superficie)  detalles.push(`<span class="cn-det-sup">Sup. ${superficie} m²</span>`);
+      if (recepcion)   detalles.push(`<span class="cn-det-rec">Recep. N° ${recepcion}</span>`);
 
       item.innerHTML = `
         <div class="cn-res-header">
@@ -291,14 +300,12 @@
           ${calle ? `<span class="cn-dir-calle">${calle}</span>` : ""}
           ${numTexto}${locTexto}${rolTexto}
         </div>
-        ${rec.m ? `<div class="cn-res-materia">${rec.m}${rec.f ? " · " + rec.f : ""}</div>` : ""}
+        ${detalles.length ? `<div class="cn-res-detalle">${detalles.join("")}</div>` : ""}
         <div class="cn-res-acciones">
           <button class="btn btn-accent btn-sm cn-btn-sel">Cargar en formulario →</button>
-          <button class="btn btn-outline btn-sm cn-btn-cip">Descargar CIP Excel</button>
         </div>
       `;
       item.querySelector(".cn-btn-sel").addEventListener("click", () => precargarCip(rec));
-      item.querySelector(".cn-btn-cip").addEventListener("click", () => descargarCipPreLlenado(rec));
       contenedor.appendChild(item);
     });
   }
