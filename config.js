@@ -368,7 +368,7 @@ window.DOM_CONFIG = {
     rolSii:                   { x: 512, y: 515, size: 8, bold: false, max: 18 },
 
     mapa:                     { x: 36,  y: 240, width: 522, height: 245 },
-    coordenadas:              { x: 36,  y: 228, size: 8, bold: true,  max: 90 },
+    coordenadas:              { x: 120, y: 230, size: 8, bold: true,  max: 45 },
 
     municipalidadComprobante: { x: 256, y: 155, size: 9, bold: true,  max: 35 },
     calleComprobante:         { x: 200,  y: 50, size: 8, bold: false, max: 65 },
@@ -380,8 +380,8 @@ window.DOM_CONFIG = {
     /* Fecha de generación — encima de la sección de checkboxes (INFORMACIONES PREVIAS ~y:760) */
     fechaGeneracionPdf:       { x: 35,  y: 800, size: 7,  bold: false, max: 55 },
 
-    /* QR code — esquina superior izquierda (espacio en blanco sobre los checkboxes) */
-    qrPdf:                    { x: 35, y: 720, size: 70 }
+    /* QR code — esquina inferior izquierda, debajo del mapa (único espacio libre suficiente) */
+    qrPdf:                    { x: 36, y: 162, size: 75 }
   }
 
 }; /* fin window.DOM_CONFIG */
