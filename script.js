@@ -600,7 +600,44 @@ function irAlFormularioDespuesDeUbicacion() {
 }
 
 /* ── eventos mapa ── */
+function leerParametrosUrl() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.toString()) return;
+  const _c = params.get("calle");
+  const _n = params.get("numero");
+  const _r = params.get("rol");
+  const _lt = params.get("lat");
+  const _ln = params.get("lng");
+  const _ce = params.get("cert");
+  const _lo = params.get("loc");
+  if (_c)  asignarValor("calle",    _c);
+  if (_n)  asignarValor("numero",   _n);
+  if (_r)  asignarValor("rolSii",   _r);
+  if (_lo) asignarValor("localidad", _lo);
+  if (_ce) {
+    const sel = document.getElementById("tipoCertificado");
+    if (sel) sel.value = _ce;
+  }
+  if (_lt && _ln) {
+    const latN = parseFloat(_lt);
+    const lngN = parseFloat(_ln);
+    if (!isNaN(latN) && !isNaN(lngN)) {
+      const colocarMarcador = () => {
+        if (typeof mapaPredio !== "undefined" && mapaPredio) {
+          mapaPredio.setView([latN, lngN], 17);
+          actualizarUbicacionPredio(latN, lngN, [_c, _n].filter(Boolean).join(" ") || "Cargado desde QR");
+        } else {
+          setTimeout(colocarMarcador, 500);
+        }
+      };
+      colocarMarcador();
+    }
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
+  leerParametrosUrl();
+
   const btnBuscar = document.getElementById("btnBuscarMapa");
   if (btnBuscar) btnBuscar.addEventListener("click", buscarDireccionEnMapa);
   const inputBuscar = document.getElementById("buscarDireccion");
@@ -839,6 +876,37 @@ async function construirBytesPdfCip() {
       const textoConsent = `El solicitante autorizó el tratamiento de sus datos personales el ${fechaHora} hrs.`;
       const posConsent = cfgPdf("consentimientoPdf",{x:55,y:95,size:6.5,bold:false,max:120});
       escribir(textoConsent, posConsent.x, posConsent.y, posConsent.size||6.5, posConsent.bold===true);
+    }
+
+    /* QR Code — URL con datos del predio para continuar en celular */
+    const posQr = cfgPdf("qrPdf", { x: 460, y: 665, size: 80 });
+    if (typeof QRCode !== "undefined") {
+      try {
+        const base = window.location.origin + window.location.pathname;
+        const qrParams = new URLSearchParams();
+        const _calle = obtenerValor("calle");
+        const _num   = obtenerValor("numero");
+        const _rol   = obtenerValor("rolSii");
+        const _lat   = obtenerValor("latitud");
+        const _lng   = obtenerValor("longitud");
+        const _cert  = obtenerValor("tipoCertificado");
+        const _loc   = obtenerValor("localidad");
+        if (_calle) qrParams.set("calle", _calle);
+        if (_num)   qrParams.set("numero", _num);
+        if (_rol)   qrParams.set("rol", _rol);
+        if (_lat)   qrParams.set("lat", _lat);
+        if (_lng)   qrParams.set("lng", _lng);
+        if (_cert)  qrParams.set("cert", _cert);
+        if (_loc)   qrParams.set("loc", _loc);
+        const qrUrl     = base + "?" + qrParams.toString();
+        const qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 200, margin: 1, errorCorrectionLevel: "M" });
+        const qrBytes   = Uint8Array.from(atob(qrDataUrl.split(",")[1]), c => c.charCodeAt(0));
+        const qrImg     = await pdfDoc.embedPng(qrBytes);
+        const sz        = posQr.size || 80;
+        pagina.drawImage(qrImg, { x: posQr.x, y: posQr.y, width: sz, height: sz });
+      } catch (e) {
+        console.warn("QR no generado:", e);
+      }
     }
 
   return await pdfDoc.save();

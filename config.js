@@ -51,7 +51,7 @@ window.DOM_CONFIG = {
     titulo:      "DOM en Línea",
     subtitulo:   "Trámites más simples, rápidos y seguros",
     descripcion: "DOM en Línea es la plataforma digital de la Dirección de Obras Municipales que permite a vecinos y contribuyentes gestionar certificados y trámites de manera rápida, segura y sin necesidad de acudir presencialmente.",
-    imagenFondo: "./img/hero.png"
+    imagenFondo: "./img/hero.png"  // ruta relativa a index.html o URL absoluta
   },
 
 
@@ -378,7 +378,10 @@ window.DOM_CONFIG = {
     consentimientoPdf:        { x: 55,  y: 28, size: 6.5, bold: false, max: 130 },
 
     /* Fecha de generación — encima de la sección de checkboxes (INFORMACIONES PREVIAS ~y:760) */
-    fechaGeneracionPdf:       { x: 35,  y: 800, size: 7,  bold: false, max: 55 }
+    fechaGeneracionPdf:       { x: 35,  y: 800, size: 7,  bold: false, max: 55 },
+
+    /* QR code — esquina superior derecha del formulario */
+    qrPdf:                    { x: 460, y: 665, size: 80 }
   }
 
 }; /* fin window.DOM_CONFIG */
