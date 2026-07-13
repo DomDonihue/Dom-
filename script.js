@@ -571,7 +571,7 @@ function actualizarEstadoFlujo() {
   const hayConsentimiento = !consentimientoRequerido || (chkConsent ? chkConsent.checked : false);
   const ok = hayUbicacion && hayConsentimiento;
 
-  ["btnGuardarDatos","btnGenerarPdf","btnImprimirPdf"].forEach(id => {
+  ["btnGuardarDatos","btnImprimirPdf","btnContinuarCelular"].forEach(id => {
     const b = document.getElementById(id);
     if (b) b.disabled = !ok;
   });
@@ -600,6 +600,56 @@ function irAlFormularioDespuesDeUbicacion() {
 }
 
 /* ── eventos mapa ── */
+function mostrarModalQr() {
+  if (!validarFormularioCip()) return;
+  if (typeof qrcode === "undefined") {
+    alert("La librería QR no está disponible. Intente recargar la página.");
+    return;
+  }
+  const modal  = document.getElementById("modalQrCelular");
+  const canvas = document.getElementById("qrModalCanvas");
+  if (!modal || !canvas) return;
+
+  const base = window.location.origin + window.location.pathname;
+  const qrParams = new URLSearchParams();
+  const _c  = obtenerValor("calle");
+  const _n  = obtenerValor("numero");
+  const _r  = obtenerValor("rolSii");
+  const _lt = obtenerValor("latitud");
+  const _ln = obtenerValor("longitud");
+  const _ce = obtenerValor("tipoCertificado");
+  const _lo = obtenerValor("localidad");
+  if (_c)  qrParams.set("calle",  _c);
+  if (_n)  qrParams.set("numero", _n);
+  if (_r)  qrParams.set("rol",    _r);
+  if (_lt) qrParams.set("lat",    _lt);
+  if (_ln) qrParams.set("lng",    _ln);
+  if (_ce) qrParams.set("cert",   _ce);
+  if (_lo) qrParams.set("loc",    _lo);
+
+  try {
+    const qr = qrcode(0, "M");
+    qr.addData(base + "?" + qrParams.toString());
+    qr.make();
+    const cellSize    = 6;
+    const moduleCount = qr.getModuleCount();
+    canvas.width      = moduleCount * cellSize;
+    canvas.height     = moduleCount * cellSize;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#1e3a5f";
+    for (let row = 0; row < moduleCount; row++) {
+      for (let col = 0; col < moduleCount; col++) {
+        if (qr.isDark(row, col)) ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+      }
+    }
+    modal.style.display = "flex";
+  } catch (e) {
+    console.error("Error generando QR modal:", e);
+  }
+}
+
 function leerParametrosUrl() {
   const params = new URLSearchParams(window.location.search);
   if (!params.toString()) return;
@@ -654,10 +704,20 @@ document.addEventListener("DOMContentLoaded", function () {
     alert("Datos preparados correctamente. Ahora puede descargar o imprimir el formulario PDF.");
   });
 
-  const btnPdf = document.getElementById("btnGenerarPdf");
-  if (btnPdf) btnPdf.addEventListener("click", () => generarPdfCip(false));
   const btnImp = document.getElementById("btnImprimirPdf");
   if (btnImp) btnImp.addEventListener("click", () => generarPdfCip(true));
+
+  const btnCelular = document.getElementById("btnContinuarCelular");
+  if (btnCelular) btnCelular.addEventListener("click", mostrarModalQr);
+
+  const btnCerrarQr = document.getElementById("btnCerrarModalQr");
+  if (btnCerrarQr) btnCerrarQr.addEventListener("click", () => {
+    const m = document.getElementById("modalQrCelular");
+    if (m) m.style.display = "none";
+  });
+  document.getElementById("modalQrCelular")?.addEventListener("click", function(e) {
+    if (e.target === this) this.style.display = "none";
+  });
 
 
   const btnLimpiarLimites = document.getElementById("btnLimpiarLimites");

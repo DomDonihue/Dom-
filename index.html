@@ -244,9 +244,9 @@
           <!-- Consentimiento de datos personales — se renderiza desde config.js -->
           <div id="consentimientoContainer"></div>
           <div class="form-actions">
-            <button type="button" class="btn btn-accent"   id="btnGuardarDatos"  disabled>Validar datos</button>
-            <button type="button" class="btn btn-accent"   id="btnGenerarPdf"    disabled>Descargar formulario PDF</button>
-            <button type="button" class="btn btn-outline"  id="btnImprimirPdf"   disabled>Imprimir formulario</button>
+            <button type="button" class="btn btn-accent"   id="btnGuardarDatos"       disabled>Validar datos</button>
+            <button type="button" class="btn btn-outline"  id="btnImprimirPdf"         disabled>Imprimir formulario</button>
+            <button type="button" class="btn btn-accent"   id="btnContinuarCelular"    disabled>📱 Continuar en su teléfono</button>
           </div>
         </form>
       </div>
@@ -333,6 +333,23 @@
       }
     });
   </script>
+
+<!-- Modal QR: Continuar en teléfono -->
+<div id="modalQrCelular" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-icon">📱</div>
+    <h3>Continuar en su teléfono</h3>
+    <p>El ciudadano escanea este código con la cámara.<br>El formulario se abrirá con la dirección y el rol ya ingresados.</p>
+    <canvas id="qrModalCanvas" style="border:2px solid #e2e8f0;border-radius:12px;padding:10px;max-width:220px;width:100%;"></canvas>
+    <div style="background:#f0f7ff;border-radius:12px;padding:14px 18px;width:100%;text-align:left;">
+      <p style="font-weight:600;color:#0f3c68;margin-bottom:8px;">El ciudadano solo deberá:</p>
+      <p style="color:#1e40af;">✅ Ingresar sus datos personales (nombre, RUT, email)</p>
+      <p style="color:#1e40af;">✅ Adjuntar sus documentos desde la galería o cámara</p>
+      <p style="color:#1e40af;">✅ Generar y descargar el PDF final</p>
+    </div>
+    <button type="button" class="btn btn-accent" id="btnCerrarModalQr" style="width:100%;">Cerrar</button>
+  </div>
+</div>
 
 </body>
 </html>
