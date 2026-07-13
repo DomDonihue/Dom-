@@ -18,8 +18,56 @@
   const DOM_EMAIL = (cfg("contacto", {}).email) || "dom@mdonihue.cl";
   const MUNICIPIO = cfg("municipalidadCorta", "Doñihue");
 
-  /* Localidades conocidas del municipio — para detección en direcciones */
+  /* Localidades conocidas + alias abreviados que aparecen en el histórico */
   const LOCALIDADES = ["Lo Miranda", "Doñihue", "Peumo", "Coinco", "San Pedro", "Los Lirios", "Las Mercedes"];
+
+  /* Alias → nombre completo (para normalizar abreviaturas del histórico) */
+  const ALIAS_LOCALIDAD = {
+    "lo mda":      "Lo Miranda",
+    "lo miranda":  "Lo Miranda",
+    "lo mir":      "Lo Miranda",
+    "l. miranda":  "Lo Miranda",
+    "donihue":     "Doñihue",
+    "dohihue":     "Doñihue"
+  };
+
+  /* Coordenadas aproximadas por localidad (fallback cuando Nominatim falla) */
+  const CENTROS = {
+    "Lo Miranda": [-34.2453, -70.8817],
+    "Doñihue":    [-34.2158, -70.9091],
+    "Peumo":      [-34.3756, -71.1997],
+    "Coinco":     [-34.2622, -70.9519],
+    "San Pedro":  [-34.2420, -70.8944],
+    "Los Lirios": [-34.2233, -70.8889],
+    "Las Mercedes":[-34.1980, -70.9210]
+  };
+
+  /* Expande abreviaturas de calles comunes en el texto del histórico */
+  function expandirAbreviaturas(texto) {
+    return texto
+      .replace(/\bAv\.?\s+/gi,      "Avenida ")
+      .replace(/\bPje\.?\s+/gi,     "Pasaje ")
+      .replace(/\bPob\.?\s+/gi,     "Población ")
+      .replace(/\bPobl?\.?\s+/gi,   "Población ")
+      .replace(/\bSta\.?\s+/gi,     "Santa ")
+      .replace(/\bSto\.?\s+/gi,     "Santo ")
+      .replace(/\bGral\.?\s+/gi,    "General ")
+      .replace(/\bPte\.?\s+/gi,     "Puente ")
+      .replace(/\bHno\.?\s+/gi,     "Hermano ")
+      .replace(/\s{2,}/g,           " ")
+      .trim();
+  }
+
+  /* Detecta y resuelve alias de localidad en texto libre */
+  function resolverLocalidadAlias(texto) {
+    const t = texto.toLowerCase().trim();
+    for (const [alias, nombre] of Object.entries(ALIAS_LOCALIDAD)) {
+      if (t === alias || t.endsWith(" " + alias) || t.includes(", " + alias)) {
+        return nombre;
+      }
+    }
+    return null;
+  }
 
   /* ── utilidades ── */
   function normalizar(s) {
@@ -35,11 +83,16 @@
     let texto    = String(dir).trim();
     let localidad = "";
 
-    /* 1. Detectar localidad al final (separada por espacio, guión o coma) */
-    for (const loc of LOCALIDADES) {
-      const re = new RegExp("[-,]?\\s*" + loc.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*$", "i");
+    /* 1. Detectar localidad al final — primero nombres completos, luego alias */
+    const candidatos = [
+      ...LOCALIDADES.map(n => ({ patron: n, nombre: n })),
+      ...Object.entries(ALIAS_LOCALIDAD).map(([alias, nombre]) => ({ patron: alias, nombre }))
+    ];
+    for (const { patron, nombre } of candidatos) {
+      const esc = patron.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const re  = new RegExp("[-,]?\\s*" + esc + "\\s*$", "i");
       if (re.test(texto)) {
-        localidad = loc;
+        localidad = nombre;
         texto = texto.replace(re, "").trim().replace(/[-,\s]+$/, "").trim();
         break;
       }
@@ -184,13 +237,16 @@
       setTimeout(() => seccion.scrollIntoView({ behavior: "smooth", block: "start" }), 180);
     }
 
-    /* Geocodificar y marcar en el mapa usando buscarDireccionEnMapa() de script.js */
-    const dirBusqueda = [calle, numero && numero !== "S/N" ? numero : "", localidad || MUNICIPIO]
+    /* Geocodificar: expandir abreviaturas y pasar centroide como fallback */
+    const calleExpandida = expandirAbreviaturas(calle);
+    const locFinal       = localidad || MUNICIPIO;
+    const dirBusqueda    = [calleExpandida, numero && numero !== "S/N" ? numero : "", locFinal]
       .filter(Boolean).join(" ");
     const campoBusq = document.getElementById("buscarDireccion");
     if (campoBusq && typeof buscarDireccionEnMapa === "function") {
       campoBusq.value = dirBusqueda;
-      setTimeout(() => buscarDireccionEnMapa(), 800);
+      const centroFallback = CENTROS[locFinal] || CENTROS[MUNICIPIO] || null;
+      setTimeout(() => buscarDireccionEnMapa(centroFallback), 800);
     }
 
     setStatus(

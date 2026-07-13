@@ -469,7 +469,7 @@ async function completarDireccionPorCoordenadas(lat, lng) {
   } catch (e) { console.warn("No se pudo autocompletar desde el mapa.", e); }
 }
 
-async function buscarDireccionEnMapa() {
+async function buscarDireccionEnMapa(centroFallback) {
   const input = document.getElementById("buscarDireccion");
   const dir   = input ? input.value.trim() : "";
   if (!dir) { alert("Ingrese una dirección o sector para buscar."); return; }
@@ -485,7 +485,19 @@ async function buscarDireccionEnMapa() {
   try {
     const r = await fetch(`https://nominatim.openstreetmap.org/search?${params}`);
     const d = await r.json();
-    if (!d || d.length === 0) { alert("No se encontró la dirección. Marque el punto manualmente."); return; }
+    if (!d || d.length === 0) {
+      /* Si viene un centroide fallback, centrar el mapa en la localidad */
+      if (centroFallback && Array.isArray(centroFallback) && centroFallback.length === 2) {
+        mapaPredio.setView(centroFallback, 16);
+        setStatus && typeof setStatus === "function"
+          ? null
+          : null;
+        alert("No se encontró la dirección exacta en el mapa.\nSe centró en la localidad correspondiente.\nMarque el punto del predio haciendo clic en el mapa.");
+      } else {
+        alert("No se encontró la dirección. Marque el punto manualmente.");
+      }
+      return;
+    }
     const res = d[0];
     const resLat = parseFloat(res.lat), resLng = parseFloat(res.lon);
     mapaPredio.setView([resLat, resLng], cfg("zoomBusqueda",17));
