@@ -375,7 +375,10 @@ window.DOM_CONFIG = {
     numeroComprobante:        { x: 500, y: 50, size: 8, bold: false, max: 15 },
 
     /* Texto de autorización de datos — posicionar debajo de la fila CALLE (y:50) */
-    consentimientoPdf:        { x: 55,  y: 28, size: 6.5, bold: false, max: 130 }
+    consentimientoPdf:        { x: 55,  y: 28, size: 6.5, bold: false, max: 130 },
+
+    /* Fecha de generación — encima de la sección de checkboxes (INFORMACIONES PREVIAS ~y:760) */
+    fechaGeneracionPdf:       { x: 35,  y: 800, size: 7,  bold: false, max: 55 }
   }
 
 }; /* fin window.DOM_CONFIG */
