@@ -719,6 +719,24 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.target === this) this.style.display = "none";
   });
 
+  /* Adjuntar documentación */
+  const inputAdj = document.getElementById("adjuntosDoc");
+  if (inputAdj) {
+    inputAdj.addEventListener("change", function() {
+      const lista = document.getElementById("listaAdjuntos");
+      if (!lista) return;
+      Array.from(this.files).forEach(file => {
+        const ext = file.name.split(".").pop();
+        const li  = document.createElement("li");
+        li.dataset.name = file.name;
+        li.innerHTML = `<span class="doc-ext">${ext}</span><span>${file.name}</span><button title="Quitar">✕</button>`;
+        li.querySelector("button").addEventListener("click", () => li.remove());
+        lista.appendChild(li);
+      });
+      this.value = "";
+    });
+  }
+
 
   const btnLimpiarLimites = document.getElementById("btnLimpiarLimites");
   if (btnLimpiarLimites) {

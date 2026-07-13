@@ -241,6 +241,18 @@
           <input type="hidden" id="latitud">
           <input type="hidden" id="longitud">
           <input type="hidden" id="limitesPropiedad">
+          <!-- Documentación requerida -->
+          <div class="doc-adjuntos-box">
+            <p class="doc-adjuntos-titulo">Documentación requerida</p>
+            <p class="doc-adjuntos-sub">Adjunte los documentos necesarios: Dominio Vigente, Copia de Escritura u otros según el trámite.</p>
+            <label class="doc-adjuntos-label" for="adjuntosDoc">
+              <span class="doc-adjuntos-icon">📎</span>
+              <span>Seleccionar archivos</span>
+              <input type="file" id="adjuntosDoc" multiple accept=".pdf,.jpg,.jpeg,.png" style="display:none;">
+            </label>
+            <ul id="listaAdjuntos" class="doc-adjuntos-lista"></ul>
+          </div>
+
           <!-- Consentimiento de datos personales — se renderiza desde config.js -->
           <div id="consentimientoContainer"></div>
           <div class="form-actions">
@@ -341,12 +353,6 @@
     <h3>Continuar en su teléfono</h3>
     <p>El ciudadano escanea este código con la cámara.<br>El formulario se abrirá con la dirección y el rol ya ingresados.</p>
     <canvas id="qrModalCanvas" style="border:2px solid #e2e8f0;border-radius:12px;padding:10px;max-width:220px;width:100%;"></canvas>
-    <div style="background:#f0f7ff;border-radius:12px;padding:14px 18px;width:100%;text-align:left;">
-      <p style="font-weight:600;color:#0f3c68;margin-bottom:8px;">El ciudadano solo deberá:</p>
-      <p style="color:#1e40af;">✅ Ingresar sus datos personales (nombre, RUT, email)</p>
-      <p style="color:#1e40af;">✅ Adjuntar sus documentos desde la galería o cámara</p>
-      <p style="color:#1e40af;">✅ Generar y descargar el PDF final</p>
-    </div>
     <button type="button" class="btn btn-accent" id="btnCerrarModalQr" style="width:100%;">Cerrar</button>
   </div>
 </div>
