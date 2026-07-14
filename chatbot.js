@@ -40,7 +40,8 @@
           { texto: "🗺️ Preparar solicitud (CIP)",      siguiente: "preparar_solicitud" },
           { texto: "⏱ Plazos de tramitación",          siguiente: "plazos" },
           { texto: "📋 Documentos requeridos",          siguiente: "documentos_general" },
-          { texto: "📞 Contacto y horarios",            siguiente: "contacto" }
+          { texto: "📞 Contacto y horarios",            siguiente: "contacto" },
+          { texto: "👷 Hablar con un profesional",       accion: "abrir_tawkto" }
         ]
       },
 
@@ -290,6 +291,22 @@
   }
 
   function handleOpcion(op) {
+    if (op.accion === "abrir_tawkto") {
+      addMsg(op.texto, false);
+      document.getElementById("cb-opciones").innerHTML = "";
+      setTimeout(() => {
+        addMsg("🔗 Conectando con un profesional de la DOM...\nEn un momento alguien le atenderá.", true);
+        setTimeout(() => {
+          if (window.Tawk_API && typeof window.Tawk_API.maximize === "function") {
+            window.Tawk_API.maximize();
+          } else {
+            addMsg("📞 Por favor contáctenos directamente:\n☎️ " + cfgContacto("telefono","") + "\n✉️ " + cfgContacto("email",""), true);
+          }
+          volverAlInicio();
+        }, 1200);
+      }, 300);
+      return;
+    }
     if (op.accion === "abrir_url") {
       addMsg(op.texto, false);
       document.getElementById("cb-opciones").innerHTML = "";
