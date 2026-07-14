@@ -617,15 +617,23 @@ function mostrarModalQr() {
   const _r  = obtenerValor("rolSii");
   const _lt = obtenerValor("latitud");
   const _ln = obtenerValor("longitud");
-  const _ce = obtenerValor("tipoCertificado");
-  const _lo = obtenerValor("localidad");
-  if (_c)  qrParams.set("calle",  _c);
-  if (_n)  qrParams.set("numero", _n);
-  if (_r)  qrParams.set("rol",    _r);
-  if (_lt) qrParams.set("lat",    _lt);
-  if (_ln) qrParams.set("lng",    _ln);
-  if (_ce) qrParams.set("cert",   _ce);
-  if (_lo) qrParams.set("loc",    _lo);
+  const _ce  = obtenerValor("tipoCertificado");
+  const _lo  = obtenerValor("localidad");
+  const _nom = obtenerValor("nombre");
+  const _rut = obtenerValor("rut");
+  const _em  = obtenerValor("email");
+  const _tel = obtenerValor("telefono");
+  if (_c)   qrParams.set("calle",    _c);
+  if (_n)   qrParams.set("numero",   _n);
+  if (_r)   qrParams.set("rol",      _r);
+  if (_lt)  qrParams.set("lat",      _lt);
+  if (_ln)  qrParams.set("lng",      _ln);
+  if (_ce)  qrParams.set("cert",     _ce);
+  if (_lo)  qrParams.set("loc",      _lo);
+  if (_nom) qrParams.set("nombre",   _nom);
+  if (_rut) qrParams.set("rut",      _rut);
+  if (_em)  qrParams.set("email",    _em);
+  if (_tel) qrParams.set("tel",      _tel);
 
   try {
     const qr = qrcode(0, "M");
@@ -668,6 +676,14 @@ function leerParametrosUrl() {
     const sel = document.getElementById("tipoCertificado");
     if (sel) sel.value = _ce;
   }
+  const _nom = params.get("nombre");
+  const _rut = params.get("rut");
+  const _em  = params.get("email");
+  const _tel = params.get("tel");
+  if (_nom) asignarValor("nombre",   _nom);
+  if (_rut) asignarValor("rut",      _rut);
+  if (_em)  asignarValor("email",    _em);
+  if (_tel) asignarValor("telefono", _tel);
   if (_lt && _ln) {
     const latN = parseFloat(_lt);
     const lngN = parseFloat(_ln);
@@ -969,13 +985,21 @@ async function construirBytesPdfCip() {
         const _lng   = obtenerValor("longitud");
         const _cert  = obtenerValor("tipoCertificado");
         const _loc   = obtenerValor("localidad");
-        if (_calle) qrParams.set("calle", _calle);
+        const _nom   = obtenerValor("nombre");
+        const _rut   = obtenerValor("rut");
+        const _em    = obtenerValor("email");
+        const _tel   = obtenerValor("telefono");
+        if (_calle) qrParams.set("calle",  _calle);
         if (_num)   qrParams.set("numero", _num);
-        if (_rol)   qrParams.set("rol", _rol);
-        if (_lat)   qrParams.set("lat", _lat);
-        if (_lng)   qrParams.set("lng", _lng);
-        if (_cert)  qrParams.set("cert", _cert);
-        if (_loc)   qrParams.set("loc", _loc);
+        if (_rol)   qrParams.set("rol",    _rol);
+        if (_lat)   qrParams.set("lat",    _lat);
+        if (_lng)   qrParams.set("lng",    _lng);
+        if (_cert)  qrParams.set("cert",   _cert);
+        if (_loc)   qrParams.set("loc",    _loc);
+        if (_nom)   qrParams.set("nombre", _nom);
+        if (_rut)   qrParams.set("rut",    _rut);
+        if (_em)    qrParams.set("email",  _em);
+        if (_tel)   qrParams.set("tel",    _tel);
         const qrUrl = base + "?" + qrParams.toString();
 
         /* Generar QR con qrcode-generator y renderizar en canvas */
