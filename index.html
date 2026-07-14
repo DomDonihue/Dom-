@@ -608,9 +608,27 @@
       font-size: 14px; flex-shrink: 0;
     }
   </style>
-  <button id="btn-prof-dom" onclick="if(window.Tawk_API){Tawk_API.showWidget();Tawk_API.maximize();}" title="Hablar con un profesional de la DOM">
+  <button id="btn-prof-dom" onclick="abrirProfesionalDOM()" title="Hablar con un profesional de la DOM">
     <span class="pdom-icon">👷</span>Profesional DOM
   </button>
+  <script>
+  function abrirProfesionalDOM() {
+    if (window.Tawk_API) {
+      Tawk_API.showWidget();
+      Tawk_API.maximize();
+    }
+  }
+  // Detectar cuando Botpress menciona transferencia a profesional → abrir Tawk.to
+  window.addEventListener('message', function(event) {
+    try {
+      var d = event.data;
+      var str = (typeof d === 'string' ? d : JSON.stringify(d || '')).toLowerCase();
+      if (str.includes('escalat') || str.includes('handoff') || str.includes('brevedad') || str.includes('profesional de la dom')) {
+        setTimeout(abrirProfesionalDOM, 2000);
+      }
+    } catch(e) {}
+  });
+  </script>
   <script src="cn_module.js"></script>
   <script>
   /* ── OBRAS MENORES: acordeón (reutiliza estilo certificados) ── */
