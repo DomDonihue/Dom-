@@ -552,16 +552,9 @@
   <script src="limites.js"></script>
   <script src="zonas.js"></script>
   <script src="script.js"></script>
-  <!-- Limpiar sesiones de Botpress y Tawk.to al recargar -->
+  <!-- Limpiar sesión Tawk.to al recargar para que no abra automático -->
   <script>
     try {
-      Object.keys(localStorage).forEach(function(k) {
-        var kl = k.toLowerCase();
-        if (kl.includes('botpress') || kl.includes('bpcontent') || kl.includes('tawk')) {
-          localStorage.removeItem(k);
-        }
-      });
-      // Limpiar cookies de Tawk.to
       document.cookie.split(';').forEach(function(c) {
         if (c.trim().toLowerCase().startsWith('tawk')) {
           document.cookie = c.split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
