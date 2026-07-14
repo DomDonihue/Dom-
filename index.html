@@ -552,12 +552,19 @@
   <script src="limites.js"></script>
   <script src="zonas.js"></script>
   <script src="script.js"></script>
-  <!-- Botpress: limpiar conversación al recargar -->
+  <!-- Limpiar sesiones de Botpress y Tawk.to al recargar -->
   <script>
     try {
       Object.keys(localStorage).forEach(function(k) {
-        if (k.toLowerCase().includes('botpress') || k.toLowerCase().includes('bpcontent')) {
+        var kl = k.toLowerCase();
+        if (kl.includes('botpress') || kl.includes('bpcontent') || kl.includes('tawk')) {
           localStorage.removeItem(k);
+        }
+      });
+      // Limpiar cookies de Tawk.to
+      document.cookie.split(';').forEach(function(c) {
+        if (c.trim().toLowerCase().startsWith('tawk')) {
+          document.cookie = c.split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
         }
       });
     } catch(e) {}
@@ -565,10 +572,13 @@
   <!-- Botpress Webchat con IA -->
   <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
   <script src="https://files.bpcontent.cloud/2026/07/14/14/20260714143550-U4QL28MA.js" defer></script>
-  <!-- Tawk.to: oculto, se abre solo desde botón profesional -->
+  <!-- Tawk.to: oculto por defecto, se abre solo desde botón profesional -->
   <script type="text/javascript">
   var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-  Tawk_API.onLoad = function(){ Tawk_API.hideWidget(); };
+  Tawk_API.onLoad = function(){
+    Tawk_API.hideWidget();
+    if (typeof Tawk_API.minimize === 'function') Tawk_API.minimize();
+  };
   (function(){
   var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
   s1.async=true;
