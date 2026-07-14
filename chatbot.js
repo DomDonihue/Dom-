@@ -298,6 +298,7 @@
         addMsg("🔗 Conectando con un profesional de la DOM...\nEn un momento alguien le atenderá.", true);
         setTimeout(() => {
           if (window.Tawk_API && typeof window.Tawk_API.maximize === "function") {
+            window.Tawk_API.showWidget();
             window.Tawk_API.maximize();
           } else {
             addMsg("📞 Por favor contáctenos directamente:\n☎️ " + cfgContacto("telefono","") + "\n✉️ " + cfgContacto("email",""), true);

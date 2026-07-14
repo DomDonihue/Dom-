@@ -553,10 +553,12 @@
   <script src="zonas.js"></script>
   <script src="script.js"></script>
   <script src="chatbot.js?v=7"></script>
-  <!--Start of Tawk.to Script — burbuja oculta, se abre solo desde el chatbot DOM-->
-  <script>var Tawk_API=Tawk_API||{};Tawk_API.onLoad=function(){Tawk_API.hideWidget();};</script>
+  <!--Start of Tawk.to Script — oculto, se abre solo desde el chatbot DOM-->
   <script type="text/javascript">
   var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+  Tawk_API.onLoad = function(){
+    Tawk_API.hideWidget();
+  };
   (function(){
   var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
   s1.async=true;
