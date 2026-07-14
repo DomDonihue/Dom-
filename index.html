@@ -555,6 +555,28 @@
   <!-- Botpress Webchat con IA -->
   <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
   <script src="https://files.bpcontent.cloud/2026/07/14/14/20260714143550-U4QL28MA.js" defer></script>
+  <script>
+  // Iniciar conversación nueva en cada carga de página
+  (function() {
+    var check = setInterval(function() {
+      if (window.botpress && typeof window.botpress.on === 'function') {
+        clearInterval(check);
+        window.botpress.on('ready', function() {
+          try {
+            // Limpiar solo claves de conversación (no auth/user)
+            Object.keys(localStorage).forEach(function(k) {
+              var kl = k.toLowerCase();
+              if ((kl.includes('botpress') || kl.startsWith('bp/')) &&
+                  (kl.includes('conversation') || kl.includes('message') || kl.includes('thread'))) {
+                localStorage.removeItem(k);
+              }
+            });
+          } catch(e) {}
+        });
+      }
+    }, 300);
+  })();
+  </script>
   <script src="cn_module.js"></script>
   <script>
   /* ── OBRAS MENORES: acordeón (reutiliza estilo certificados) ── */
