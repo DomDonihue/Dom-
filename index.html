@@ -552,69 +552,9 @@
   <script src="limites.js"></script>
   <script src="zonas.js"></script>
   <script src="script.js"></script>
-  <!-- Limpiar sesión Tawk.to al recargar para que no abra automático -->
-  <script>
-    try {
-      document.cookie.split(';').forEach(function(c) {
-        if (c.trim().toLowerCase().startsWith('tawk')) {
-          document.cookie = c.split('=')[0] + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-        }
-      });
-    } catch(e) {}
-  </script>
   <!-- Botpress Webchat con IA -->
   <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
   <script src="https://files.bpcontent.cloud/2026/07/14/14/20260714143550-U4QL28MA.js" defer></script>
-  <!-- Tawk.to: oculto por defecto, se abre solo desde botón profesional -->
-  <script type="text/javascript">
-  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-  Tawk_API.onLoad = function(){
-    Tawk_API.hideWidget();
-    if (typeof Tawk_API.minimize === 'function') Tawk_API.minimize();
-  };
-  (function(){
-  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-  s1.async=true;
-  s1.src='https://embed.tawk.to/6a565f6d47cfcd1d4cec34c5/1jtgm9h6l';
-  s1.charset='UTF-8';
-  s1.setAttribute('crossorigin','*');
-  s0.parentNode.insertBefore(s1,s0);
-  })();
-  </script>
-  <script>
-  function abrirProfesionalDOM() {
-    if (window.Tawk_API) {
-      Tawk_API.showWidget();
-      Tawk_API.maximize();
-    }
-  }
-  var _tawkAbierto = false;
-  function detectarEscalacion(texto) {
-    if (_tawkAbierto) return;
-    var t = (texto || '').toLowerCase();
-    if (t.includes('profesional') || t.includes('brevedad') || t.includes('atender') || t.includes('escalat') || t.includes('funcionario')) {
-      _tawkAbierto = true;
-      setTimeout(function() { abrirProfesionalDOM(); _tawkAbierto = false; }, 1800);
-    }
-  }
-  // Método 1: API de eventos de Botpress
-  var _bpCheck = setInterval(function() {
-    if (window.botpress && typeof window.botpress.on === 'function') {
-      clearInterval(_bpCheck);
-      window.botpress.on('message', function(ev) {
-        detectarEscalacion(ev.text || ev.message || JSON.stringify(ev));
-      });
-    }
-  }, 600);
-  // Método 2: postMessage del iframe Botpress (respaldo)
-  window.addEventListener('message', function(event) {
-    try {
-      var d = event.data;
-      var str = typeof d === 'string' ? d : JSON.stringify(d || '');
-      detectarEscalacion(str);
-    } catch(e) {}
-  });
-  </script>
   <script src="cn_module.js"></script>
   <script>
   /* ── OBRAS MENORES: acordeón (reutiliza estilo certificados) ── */
