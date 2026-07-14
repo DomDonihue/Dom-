@@ -588,29 +588,6 @@
   s0.parentNode.insertBefore(s1,s0);
   })();
   </script>
-  <!-- Botón profesional DOM — mismo estilo que burbuja Botpress -->
-  <style>
-    #btn-prof-dom {
-      position: fixed; bottom: 88px; right: 16px; z-index: 9997;
-      background: #1e3a5f; color: #fff; border: none;
-      border-radius: 24px; padding: 9px 16px 9px 12px;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      box-shadow: 0 4px 18px rgba(30,58,95,.35);
-      display: flex; align-items: center; gap: 7px;
-      font-family: inherit; transition: background .15s, transform .12s;
-      white-space: nowrap;
-    }
-    #btn-prof-dom:hover { background: #2a4f80; transform: translateY(-2px); }
-    #btn-prof-dom .pdom-icon {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: rgba(255,255,255,.18);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; flex-shrink: 0;
-    }
-  </style>
-  <button id="btn-prof-dom" onclick="abrirProfesionalDOM()" title="Hablar con un profesional de la DOM">
-    <span class="pdom-icon">👷</span>Profesional DOM
-  </button>
   <script>
   function abrirProfesionalDOM() {
     if (window.Tawk_API) {
@@ -618,14 +595,30 @@
       Tawk_API.maximize();
     }
   }
-  // Detectar cuando Botpress menciona transferencia a profesional → abrir Tawk.to
+  var _tawkAbierto = false;
+  function detectarEscalacion(texto) {
+    if (_tawkAbierto) return;
+    var t = (texto || '').toLowerCase();
+    if (t.includes('profesional') || t.includes('brevedad') || t.includes('atender') || t.includes('escalat') || t.includes('funcionario')) {
+      _tawkAbierto = true;
+      setTimeout(function() { abrirProfesionalDOM(); _tawkAbierto = false; }, 1800);
+    }
+  }
+  // Método 1: API de eventos de Botpress
+  var _bpCheck = setInterval(function() {
+    if (window.botpress && typeof window.botpress.on === 'function') {
+      clearInterval(_bpCheck);
+      window.botpress.on('message', function(ev) {
+        detectarEscalacion(ev.text || ev.message || JSON.stringify(ev));
+      });
+    }
+  }, 600);
+  // Método 2: postMessage del iframe Botpress (respaldo)
   window.addEventListener('message', function(event) {
     try {
       var d = event.data;
-      var str = (typeof d === 'string' ? d : JSON.stringify(d || '')).toLowerCase();
-      if (str.includes('escalat') || str.includes('handoff') || str.includes('brevedad') || str.includes('profesional de la dom')) {
-        setTimeout(abrirProfesionalDOM, 2000);
-      }
+      var str = typeof d === 'string' ? d : JSON.stringify(d || '');
+      detectarEscalacion(str);
     } catch(e) {}
   });
   </script>
