@@ -317,39 +317,6 @@
     </div>
   </section>
 
-  <!-- CERTIFICADO DE NÚMERO -->
-  <section class="section cn-section" id="certificado-numero">
-    <div class="container">
-      <div class="cn-section-grid">
-
-        <!-- Texto explicativo -->
-        <div class="cn-intro">
-          <span class="section-kicker">Paso previo al trámite</span>
-          <h2>Buscar predio en registro histórico</h2>
-          <p>Antes de preparar la solicitud, verifique si su predio ya está registrado en la base histórica de la DOM (1980–2026). Si lo encontramos, cargamos automáticamente la dirección, número y localidad.</p>
-          <div class="cn-pasos">
-            <div class="cn-paso"><span class="cn-paso-n">1</span>Busque por nombre, ROL o dirección</div>
-            <div class="cn-paso"><span class="cn-paso-n">2</span>Seleccione el predio encontrado</div>
-            <div class="cn-paso"><span class="cn-paso-n">3</span>Los datos se cargan automáticamente</div>
-            <div class="cn-paso"><span class="cn-paso-n">4</span>Complete el mapa y descargue el PDF</div>
-          </div>
-        </div>
-
-        <!-- Panel búsqueda -->
-        <div class="cn-panel">
-          <div class="cn-busqueda-row">
-            <input type="text" id="cn-busqueda" class="cn-input" placeholder="Nombre, ROL (ej: 455-12) o dirección">
-            <button type="button" class="btn btn-accent" id="cn-btn-buscar">Buscar</button>
-            <button type="button" class="btn btn-outline" id="cn-btn-limpiar" style="display:none">Limpiar</button>
-          </div>
-          <div id="cn-status" class="cn-status" style="display:none"></div>
-          <div id="cn-resultados" class="cn-resultados"></div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
   <!-- FORMULARIO CIP -->
   <section class="section" id="preparar-solicitud">
     <div class="container">
@@ -485,6 +452,39 @@
             <button type="button" class="btn btn-accent"   id="btnContinuarCelular"    disabled>📱 Continuar en su teléfono</button>
           </div>
         </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- CERTIFICADO DE NÚMERO -->
+  <section class="section cn-section" id="certificado-numero">
+    <div class="container">
+      <div class="cn-section-grid">
+
+        <!-- Texto explicativo -->
+        <div class="cn-intro">
+          <span class="section-kicker">Paso previo al trámite</span>
+          <h2>Buscar predio en registro histórico</h2>
+          <p>Antes de preparar la solicitud, verifique si su predio ya está registrado en la base histórica de la DOM (1980–2026). Si lo encontramos, cargamos automáticamente la dirección, número y localidad.</p>
+          <div class="cn-pasos">
+            <div class="cn-paso"><span class="cn-paso-n">1</span>Busque por nombre, ROL o dirección</div>
+            <div class="cn-paso"><span class="cn-paso-n">2</span>Seleccione el predio encontrado</div>
+            <div class="cn-paso"><span class="cn-paso-n">3</span>Los datos se cargan automáticamente</div>
+            <div class="cn-paso"><span class="cn-paso-n">4</span>Complete el mapa y descargue el PDF</div>
+          </div>
+        </div>
+
+        <!-- Panel búsqueda -->
+        <div class="cn-panel">
+          <div class="cn-busqueda-row">
+            <input type="text" id="cn-busqueda" class="cn-input" placeholder="Nombre, ROL (ej: 455-12) o dirección">
+            <button type="button" class="btn btn-accent" id="cn-btn-buscar">Buscar</button>
+            <button type="button" class="btn btn-outline" id="cn-btn-limpiar" style="display:none">Limpiar</button>
+          </div>
+          <div id="cn-status" class="cn-status" style="display:none"></div>
+          <div id="cn-resultados" class="cn-resultados"></div>
+        </div>
+
       </div>
     </div>
   </section>
