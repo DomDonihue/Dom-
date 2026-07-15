@@ -972,63 +972,6 @@ async function construirBytesPdfCip() {
       escribir(textoConsent, posConsent.x, posConsent.y, posConsent.size||6.5, posConsent.bold===true);
     }
 
-    /* QR Code — URL con datos del predio para continuar en celular */
-    const posQr = cfgPdf("qrPdf", { x: 460, y: 665, size: 80 });
-    if (typeof qrcode !== "undefined") {
-      try {
-        const base = window.location.origin + window.location.pathname;
-        const qrParams = new URLSearchParams();
-        const _calle = obtenerValor("calle");
-        const _num   = obtenerValor("numero");
-        const _rol   = obtenerValor("rolSii");
-        const _lat   = obtenerValor("latitud");
-        const _lng   = obtenerValor("longitud");
-        const _cert  = obtenerValor("tipoCertificado");
-        const _loc   = obtenerValor("localidad");
-        const _nom   = obtenerValor("nombre");
-        const _rut   = obtenerValor("rut");
-        const _em    = obtenerValor("email");
-        const _tel   = obtenerValor("telefono");
-        if (_calle) qrParams.set("calle",  _calle);
-        if (_num)   qrParams.set("numero", _num);
-        if (_rol)   qrParams.set("rol",    _rol);
-        if (_lat)   qrParams.set("lat",    _lat);
-        if (_lng)   qrParams.set("lng",    _lng);
-        if (_cert)  qrParams.set("cert",   _cert);
-        if (_loc)   qrParams.set("loc",    _loc);
-        if (_nom)   qrParams.set("nombre", _nom);
-        if (_rut)   qrParams.set("rut",    _rut);
-        if (_em)    qrParams.set("email",  _em);
-        if (_tel)   qrParams.set("tel",    _tel);
-        const qrUrl = base + "?" + qrParams.toString();
-
-        /* Generar QR con qrcode-generator y renderizar en canvas */
-        const qr = qrcode(0, "M");
-        qr.addData(qrUrl);
-        qr.make();
-        const cellSize    = 4;
-        const moduleCount = qr.getModuleCount();
-        const canvasQr    = document.createElement("canvas");
-        canvasQr.width    = moduleCount * cellSize;
-        canvasQr.height   = moduleCount * cellSize;
-        const ctx = canvasQr.getContext("2d");
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canvasQr.width, canvasQr.height);
-        ctx.fillStyle = "#000000";
-        for (let row = 0; row < moduleCount; row++) {
-          for (let col = 0; col < moduleCount; col++) {
-            if (qr.isDark(row, col)) ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-          }
-        }
-        const qrDataUrl = canvasQr.toDataURL("image/png");
-        const qrBytes   = Uint8Array.from(atob(qrDataUrl.split(",")[1]), c => c.charCodeAt(0));
-        const qrImg     = await pdfDoc.embedPng(qrBytes);
-        const sz        = posQr.size || 80;
-        pagina.drawImage(qrImg, { x: posQr.x, y: posQr.y, width: sz, height: sz });
-      } catch (e) {
-        console.error("QR no generado:", e);
-      }
-    }
 
   return await pdfDoc.save();
 }
