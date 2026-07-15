@@ -55,11 +55,8 @@ document.addEventListener("DOMContentLoaded", function () {
   setText("heroTitulo",     hero.titulo     || "DOM en Línea");
   setText("heroSubtitulo",  hero.subtitulo  || "");
   setText("heroDescripcion",hero.descripcion|| "");
-  const heroBg = document.querySelector(".hero");
-  if (heroBg && hero.imagenFondo) {
-    heroBg.style.backgroundImage =
-      `linear-gradient(90deg,rgba(15,60,104,.85) 0%,rgba(15,60,104,.7) 40%,rgba(15,60,104,.4) 70%,rgba(15,60,104,.2) 100%),url("${hero.imagenFondo}")`;
-  }
+  const heroBgImg = document.getElementById("heroBgImg");
+  if (heroBgImg && hero.imagenFondo) heroBgImg.src = hero.imagenFondo;
 
   /* video */
   const vid = cfg("video", { mostrar: true });
