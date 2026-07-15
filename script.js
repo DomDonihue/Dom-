@@ -634,7 +634,7 @@ function mostrarModalQr() {
 
   try {
     const qr = qrcode(0, "M");
-    qr.addData(base + "?" + qrParams.toString());
+    qr.addData(base + "?" + qrParams.toString() + "#preparar-solicitud");
     qr.make();
     const cellSize    = 6;
     const moduleCount = qr.getModuleCount();
