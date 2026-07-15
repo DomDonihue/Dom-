@@ -463,7 +463,7 @@
 
         <!-- Texto explicativo -->
         <div class="cn-intro">
-          <span class="section-kicker">Paso previo al trámite</span>
+          <span class="section-kicker">Paso previo a la solicitud de certificados</span>
           <h2>Buscar predio en registro histórico</h2>
           <p>Antes de preparar la solicitud, verifique si su predio ya está registrado en la base histórica de la DOM (1980–2026). Si lo encontramos, cargamos automáticamente la dirección, número y localidad.</p>
           <div class="cn-pasos">
@@ -552,31 +552,25 @@
   <script src="limites.js"></script>
   <script src="zonas.js"></script>
   <script src="script.js"></script>
+  <!-- Limpiar conversación Botpress antes de cargar el widget -->
+  <script>
+  try {
+    var _bpKeys = [];
+    for (var _i = 0; _i < localStorage.length; _i++) {
+      var _k = localStorage.key(_i);
+      if (_k) {
+        var _kl = _k.toLowerCase();
+        if (_kl.includes('botpress') || _kl.includes('bpcontent') || _kl.startsWith('bp/') || _kl.startsWith('bp_')) {
+          _bpKeys.push(_k);
+        }
+      }
+    }
+    _bpKeys.forEach(function(k) { localStorage.removeItem(k); });
+  } catch(e) {}
+  </script>
   <!-- Botpress Webchat con IA -->
   <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
   <script src="https://files.bpcontent.cloud/2026/07/14/14/20260714143550-U4QL28MA.js" defer></script>
-  <script>
-  // Iniciar conversación nueva en cada carga de página
-  (function() {
-    var check = setInterval(function() {
-      if (window.botpress && typeof window.botpress.on === 'function') {
-        clearInterval(check);
-        window.botpress.on('ready', function() {
-          try {
-            // Limpiar solo claves de conversación (no auth/user)
-            Object.keys(localStorage).forEach(function(k) {
-              var kl = k.toLowerCase();
-              if ((kl.includes('botpress') || kl.startsWith('bp/')) &&
-                  (kl.includes('conversation') || kl.includes('message') || kl.includes('thread'))) {
-                localStorage.removeItem(k);
-              }
-            });
-          } catch(e) {}
-        });
-      }
-    }, 300);
-  })();
-  </script>
   <script src="cn_module.js"></script>
   <script>
   /* ── OBRAS MENORES: acordeón (reutiliza estilo certificados) ── */
