@@ -534,21 +534,7 @@
   <script src="zonas.js"></script>
   <script src="script.js"></script>
   <!-- Limpiar conversación Botpress antes de cargar el widget -->
-  <script>
-  try {
-    var _bpKeys = [];
-    for (var _i = 0; _i < localStorage.length; _i++) {
-      var _k = localStorage.key(_i);
-      if (_k) {
-        var _kl = _k.toLowerCase();
-        if (_kl.includes('botpress') || _kl.includes('bpcontent') || _kl.startsWith('bp/') || _kl.startsWith('bp_')) {
-          _bpKeys.push(_k);
-        }
-      }
-    }
-    _bpKeys.forEach(function(k) { localStorage.removeItem(k); });
-  } catch(e) {}
-  </script>
+  <script>try { localStorage.clear(); } catch(e) {}</script>
   <!-- Botpress Webchat con IA -->
   <script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js"></script>
   <script src="https://files.bpcontent.cloud/2026/07/14/14/20260714143550-U4QL28MA.js" defer></script>
