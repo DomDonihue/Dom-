@@ -1,0 +1,24 @@
+{
+  "name": "DOM en Línea - Municipalidad de Doñihue",
+  "short_name": "DOM Vecino",
+  "description": "Trámites y certificados de la Dirección de Obras Municipales de Doñihue",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f3c68",
+  "theme_color": "#0f3c68",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "./img/imgChat.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./img/imgChat.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
