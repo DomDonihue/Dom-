@@ -568,10 +568,12 @@ function actualizarEstadoFlujo() {
   const hayConsentimiento = !consentimientoRequerido || (chkConsent ? chkConsent.checked : false);
   const ok = hayUbicacion && hayConsentimiento;
 
-  ["btnGuardarDatos","btnImprimirPdf","btnContinuarCelular","btnEnviarSolicitud"].forEach(id => {
+  ["btnGuardarDatos","btnImprimirPdf","btnContinuarCelular"].forEach(id => {
     const b = document.getElementById(id);
     if (b) b.disabled = !ok;
   });
+  const btnEnv = document.getElementById("btnEnviarSolicitud");
+  if (btnEnv && btnEnv.style.display !== "none") btnEnv.disabled = !ok;
 
   const est = document.getElementById("estadoUbicacion");
   if (est) {
@@ -721,10 +723,18 @@ document.addEventListener("DOMContentLoaded", function () {
   if (btnImp) btnImp.addEventListener("click", () => generarPdfCip(true));
 
   const btnCelular = document.getElementById("btnContinuarCelular");
-  if (btnCelular) btnCelular.addEventListener("click", mostrarModalQr);
+  if (btnCelular) btnCelular.addEventListener("click", function() {
+    mostrarModalQr();
+    mostrarBtnEnviar();
+  });
 
   const btnEnviar = document.getElementById("btnEnviarSolicitud");
   if (btnEnviar) btnEnviar.addEventListener("click", enviarSolicitudDOM);
+
+  /* Mostrar botón enviar si la página cargó desde un QR (ya está en el teléfono) */
+  if (window.location.search.includes("calle") || window.location.search.includes("rol")) {
+    mostrarBtnEnviar();
+  }
 
   const btnCerrarQr = document.getElementById("btnCerrarModalQr");
   if (btnCerrarQr) btnCerrarQr.addEventListener("click", () => {
@@ -975,6 +985,15 @@ async function construirBytesPdfCip() {
 
 
   return await pdfDoc.save();
+}
+
+function mostrarBtnEnviar() {
+  const btn = document.getElementById("btnEnviarSolicitud");
+  if (!btn) return;
+  btn.style.display = "";
+  /* habilitar solo si el formulario ya está validado */
+  const ok = !document.getElementById("btnImprimirPdf")?.disabled;
+  btn.disabled = !ok;
 }
 
 /* Enviar solicitud completa (PDF + adjuntos) a la DOM desde el teléfono */
