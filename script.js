@@ -731,10 +731,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnEnviar = document.getElementById("btnEnviarSolicitud");
   if (btnEnviar) btnEnviar.addEventListener("click", enviarSolicitudDOM);
 
-  /* Si es móvil: ocultar "Continuar en su teléfono" y mostrar "Enviar solicitud" directamente */
-  const esMobil = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
-  const desdeQR = window.location.search.includes("calle") || window.location.search.includes("rol");
-  if (esMobil || desdeQR) {
+  /* Detectar si se llegó escaneando el QR (URL tiene parámetros del formulario) */
+  const _qp = new URLSearchParams(window.location.search);
+  const desdeQR = ["calle","rol","lat","lng","cert","nombre","rut"].some(p => _qp.has(p));
+
+  /* Detectar si es un dispositivo móvil real */
+  const esMobil = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  if (desdeQR || esMobil) {
+    /* Estamos en el teléfono: no tiene sentido "continuar en teléfono" */
     if (btnCelular) btnCelular.style.display = "none";
     mostrarBtnEnviar();
   }
