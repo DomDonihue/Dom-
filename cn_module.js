@@ -310,15 +310,7 @@
     contenedor.innerHTML = "";
 
     if (!resultados.length) {
-      setStatus("No se encontraron registros. Puede enviar una consulta al equipo DOM.", "warn");
-      const div = document.createElement("div");
-      div.className = "cn-no-encontrado";
-      div.innerHTML = `
-        <p>Si su predio no aparece en el registro histórico, envíe una consulta directamente al equipo DOM para que le asignen el número oficial.</p>
-        <button class="btn btn-outline" id="cn-btn-correo-nf">Enviar consulta por correo</button>
-      `;
-      contenedor.appendChild(div);
-      document.getElementById("cn-btn-correo-nf").addEventListener("click", enviarCorreoConsulta);
+      setStatus("No se encontraron registros. Puede buscar la dirección directamente en el mapa.", "warn");
       return;
     }
 
