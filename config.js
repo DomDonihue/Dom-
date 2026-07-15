@@ -51,7 +51,7 @@ window.DOM_CONFIG = {
     titulo:      "DOM en Línea",
     subtitulo:   "Trámites más simples, rápidos y seguros",
     descripcion: "DOM en Línea es la plataforma digital de la Dirección de Obras Municipales que permite a vecinos y contribuyentes gestionar certificados y trámites de manera rápida, segura y sin necesidad de acudir presencialmente.",
-    imagenFondo: "./img/hero.png"  // ruta relativa a index.html o URL absoluta
+    imagenFondo: "./img/hero.png "  // ruta relativa a index.html o URL absoluta
   },
   
 
