@@ -331,9 +331,9 @@
 
       <!-- Buscador unificado de predio -->
       <div class="cn-busqueda-integrada">
-        <p class="cn-busqueda-hint">¿Ya tiene un trámite anterior? Busque su predio para cargar los datos automáticamente.</p>
+        <p class="cn-busqueda-hint">Busque por propietario, ROL o dirección — si no aparece en el registro, el mapa se posicionará automáticamente.</p>
         <div class="cn-busqueda-row">
-          <input type="text" id="cn-busqueda" class="cn-input" placeholder="Propietario, ROL (ej: 455-12) o dirección">
+          <input type="text" id="cn-busqueda" class="cn-input" placeholder="Propietario, ROL (ej: 455-12) o dirección del predio">
           <button type="button" class="btn btn-accent" id="cn-btn-buscar">Buscar predio</button>
           <button type="button" class="btn btn-outline" id="cn-btn-limpiar" style="display:none">Limpiar</button>
         </div>
@@ -351,10 +351,10 @@
         <div class="solicitud-card solicitud-card-principal" id="tarjetaUbicacion">
           <span class="paso-etiqueta">Paso 1</span>
           <h3>Ubicación del predio</h3>
-          <p class="form-help">Busca la dirección o marca el punto directamente en el mapa. Los datos se completarán automáticamente.</p>
-          <div class="map-search">
-            <input type="text" id="buscarDireccion" placeholder="Ej: Avenida Estación 344">
-            <button type="button" class="btn btn-accent" id="btnBuscarMapa">Buscar</button>
+          <p class="form-help">Use el buscador de arriba o marque el punto directamente en el mapa.</p>
+          <div style="display:none">
+            <input type="text" id="buscarDireccion">
+            <button type="button" id="btnBuscarMapa">Buscar</button>
           </div>
           <div id="mapaPredio"></div>
 

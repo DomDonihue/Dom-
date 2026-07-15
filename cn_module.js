@@ -182,6 +182,16 @@
     return todos.slice(0, 30).map(x => x.rec);
   }
 
+  /* Dispara búsqueda en el mapa usando el input oculto de script.js */
+  function buscarEnMapa(termino) {
+    const inp = document.getElementById("buscarDireccion");
+    const btn = document.getElementById("btnBuscarMapa");
+    if (inp && btn && termino) {
+      inp.value = termino;
+      btn.click();
+    }
+  }
+
   /* ── UI helpers ── */
   function setStatus(msg, tipo) {
     const el = document.getElementById("cn-status");
@@ -310,7 +320,8 @@
     contenedor.innerHTML = "";
 
     if (!resultados.length) {
-      setStatus("No se encontraron registros. Puede buscar la dirección directamente en el mapa.", "warn");
+      setStatus("No se encontraron registros en el historial — buscando en el mapa...", "warn");
+      buscarEnMapa(document.getElementById("cn-busqueda")?.value || "");
       return;
     }
 
