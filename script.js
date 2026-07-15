@@ -732,16 +732,17 @@ document.addEventListener("DOMContentLoaded", function () {
     if (e.target === this) this.style.display = "none";
   });
 
-  /* Adjuntar documentación */
+  /* Adjuntar documentación — guardar File objects para incluir en PDF */
   const inputAdj = document.getElementById("adjuntosDoc");
   if (inputAdj) {
     inputAdj.addEventListener("change", function() {
       const lista = document.getElementById("listaAdjuntos");
       if (!lista) return;
       Array.from(this.files).forEach(file => {
-        const ext = file.name.split(".").pop();
+        const ext = file.name.split(".").pop().toUpperCase();
         const li  = document.createElement("li");
         li.dataset.name = file.name;
+        li._fileObj = file;
         li.innerHTML = `<span class="doc-ext">${ext}</span><span>${file.name}</span><button title="Quitar">✕</button>`;
         li.querySelector("button").addEventListener("click", () => li.remove());
         lista.appendChild(li);
@@ -973,12 +974,55 @@ async function construirBytesPdfCip() {
   return await pdfDoc.save();
 }
 
+/* Combina el formulario PDF con los adjuntos (PDF e imágenes) en un solo PDF */
+async function combinarConAdjuntos(formBytes) {
+  const lista = document.getElementById("listaAdjuntos");
+  const items = lista ? Array.from(lista.querySelectorAll("li")).filter(li => li._fileObj) : [];
+  if (!items.length) return formBytes;
+
+  const { PDFDocument } = PDFLib;
+  const final = await PDFDocument.create();
+
+  /* 1. Páginas del formulario */
+  const formDoc = await PDFDocument.load(formBytes);
+  const formPags = await final.copyPages(formDoc, formDoc.getPageIndices());
+  formPags.forEach(p => final.addPage(p));
+
+  /* 2. Cada adjunto */
+  for (const li of items) {
+    const file = li._fileObj;
+    const buf  = await file.arrayBuffer();
+    const nom  = file.name.toLowerCase();
+    try {
+      if (nom.endsWith(".pdf")) {
+        const adjDoc = await PDFDocument.load(buf, { ignoreEncryption: true });
+        const pags   = await final.copyPages(adjDoc, adjDoc.getPageIndices());
+        pags.forEach(p => final.addPage(p));
+      } else {
+        const bytes = new Uint8Array(buf);
+        const img   = nom.endsWith(".png") ? await final.embedPng(bytes) : await final.embedJpg(bytes);
+        const pag   = final.addPage([595.28, 841.89]); // A4
+        const scaled = img.scaleToFit(535, 781);
+        pag.drawImage(img, {
+          x: (595.28 - scaled.width)  / 2,
+          y: (841.89 - scaled.height) / 2,
+          width:  scaled.width,
+          height: scaled.height
+        });
+      }
+    } catch(e) { console.warn("No se pudo incluir adjunto:", file.name, e); }
+  }
+
+  return await final.save();
+}
+
 async function generarPdfCip(imprimir=false) {
   if (!validarFormularioCip()) return;
   actualizarPaso("pasoFormulario","completado");
   actualizarPaso("pasoPdf","activo");
   try {
-    const bytes = await construirBytesPdfCip();
+    const formBytes = await construirBytesPdfCip();
+    const bytes     = await combinarConAdjuntos(formBytes);
     const blob  = new Blob([bytes],{type:"application/pdf"});
     const url   = URL.createObjectURL(blob);
     if (imprimir) {
@@ -992,7 +1036,7 @@ async function generarPdfCip(imprimir=false) {
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       setTimeout(function(){ URL.revokeObjectURL(url); limpiarFormulario(); }, 1500);
     }
-  } catch(e) { console.error(e); alert("No se pudo generar el PDF. Revise las rutas del PDF base en config.js."); }
+  } catch(e) { console.error(e); alert("No se pudo generar el PDF. Revise los archivos adjuntos e intente nuevamente."); }
 }
 
 /* ================================================================
