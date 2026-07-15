@@ -166,6 +166,43 @@ img {
 .envio-hint      { color: #6b7280; font-size: .82rem; margin-top: 10px; }
 .envio-btns      { display: flex; gap: 10px; flex-wrap: wrap; }
 
+/* ── Banner cuenta regresiva limpieza formulario ── */
+.banner-cuenta-regresiva {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #fffbeb;
+  border: 1.5px solid #f59e0b;
+  border-radius: 10px;
+  font-size: .88rem;
+  color: #78350f;
+  flex-wrap: wrap;
+}
+.banner-cuenta-regresiva.visible { display: flex; }
+.cuenta-icono { font-size: 1.2rem; flex-shrink: 0; }
+.cuenta-texto { flex: 1; min-width: 180px; line-height: 1.4; }
+.cuenta-texto strong { font-size: 1rem; color: #92400e; }
+.cuenta-cancelar {
+  padding: 5px 14px;
+  border: 1.5px solid #d97706;
+  background: #fff;
+  color: #92400e;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: .82rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+.cuenta-cancelar:hover { background: #fef3c7; }
+.banner-cuenta-regresiva.ok {
+  background: #f0fdf4;
+  border-color: #16a34a;
+  color: #14532d;
+}
+
 .gov-btn {
   background: #ffffff;
   color: #0f69b4;

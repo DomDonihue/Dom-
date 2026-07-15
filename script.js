@@ -207,6 +207,7 @@ function construirRecursos() {
 let mapaPredio, marcadorPredio;
 let drawnItems, drawControl;
 let miniMapa = null, miniMapaLayer = null;
+let _timerLimpieza = null;
 
 function iniciarMapaPredio() {
   const contenedor = document.getElementById("mapaPredio");
@@ -726,6 +727,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (btnCelular) btnCelular.addEventListener("click", function() {
     mostrarModalQr();
     mostrarBtnEnviar();
+    iniciarCuentaRegresiva(45);
   });
 
   const btnEnviar = document.getElementById("btnEnviarSolicitud");
@@ -934,10 +936,26 @@ async function construirBytesPdfCip() {
     campo("planoLoteo",obtenerValor("planoLoteo"),{x:412,y:595,size:8,bold:false,max:18});
     campo("rolSii",  obtenerValor("rolSii"),  {x:512,y:595,size:8,bold:false,max:18});
 
-    const capturaInfo = await capturarMapaParaPdf();
-    const imgPng      = await pdfDoc.embedPng(capturaInfo.imagen);
-    const posMapa     = cfgPdf("mapa",{x:55,y:305,width:529,height:259});
-    pagina.drawImage(imgPng,{x:posMapa.x,y:posMapa.y,width:posMapa.width,height:posMapa.height});
+    /* Captura del mapa — opcional: si html2canvas falla en iOS Safari
+       (CORS con tiles de Google Maps) el PDF se genera igual sin imagen */
+    let capturaInfo = null;
+    try {
+      capturaInfo = await capturarMapaParaPdf();
+    } catch (mapErr) {
+      console.warn("Captura de mapa no disponible (posible restricción iOS):", mapErr);
+    }
+
+    const posMapa = cfgPdf("mapa",{x:55,y:305,width:529,height:259});
+
+    if (capturaInfo) {
+      const imgPng = await pdfDoc.embedPng(capturaInfo.imagen);
+      pagina.drawImage(imgPng,{x:posMapa.x,y:posMapa.y,width:posMapa.width,height:posMapa.height});
+    } else {
+      /* Recuadro de reemplazo cuando no hay imagen del mapa */
+      pagina.drawRectangle({ x:posMapa.x, y:posMapa.y, width:posMapa.width, height:posMapa.height,
+        borderColor:rgb(0.7,0.7,0.7), borderWidth:1, color:rgb(0.96,0.96,0.96), opacity:1 });
+      escribir("Coordenadas en texto — ver campo inferior", posMapa.x + 10, posMapa.y + posMapa.height/2, 9, false);
+    }
 
     const posCoord = cfgPdf("coordenadas",{x:65,y:312,size:8,bold:true,max:80});
     if (obtenerValor("latitud") && obtenerValor("longitud")) {
@@ -947,7 +965,7 @@ async function construirBytesPdfCip() {
 
     /* Polígono de deslindes dibujado sobre el PDF */
     const limitesJson = obtenerValor("limitesPropiedad");
-    if (limitesJson && capturaInfo.bounds) {
+    if (limitesJson && capturaInfo && capturaInfo.bounds) {
       try {
         const geojson = JSON.parse(limitesJson);
         const feature = geojson.features?.[0];
@@ -995,6 +1013,68 @@ async function construirBytesPdfCip() {
   return await pdfDoc.save();
 }
 
+/* ================================================================
+   CUENTA REGRESIVA — limpia el formulario del PC tras continuar en teléfono
+   El teléfono ya tiene todos los datos en la URL (parámetros QR),
+   así que limpiar el escritorio no lo afecta en nada.
+   ================================================================ */
+function obtenerBannerCuentaRegresiva() {
+  let banner = document.getElementById("bannerCuentaRegresiva");
+  if (!banner) {
+    banner = document.createElement("div");
+    banner.id = "bannerCuentaRegresiva";
+    banner.className = "banner-cuenta-regresiva";
+    const panelEnvio = document.getElementById("panelEnvio");
+    if (panelEnvio && panelEnvio.parentNode) {
+      panelEnvio.parentNode.insertBefore(banner, panelEnvio.nextSibling);
+    }
+  }
+  return banner;
+}
+
+function iniciarCuentaRegresiva(segundos) {
+  segundos = segundos || 45;
+  cancelarCuentaRegresiva();
+  const banner = obtenerBannerCuentaRegresiva();
+  if (!banner) return;
+
+  let restantes = segundos;
+
+  function actualizar() {
+    banner.className = "banner-cuenta-regresiva visible";
+    banner.innerHTML =
+      '<span class="cuenta-icono">📱</span>' +
+      '<span class="cuenta-texto">El teléfono recibió todos los datos. El PC se reiniciará en <strong>' + restantes + '</strong> seg.</span>' +
+      '<button type="button" class="cuenta-cancelar" id="btnCancelarLimpieza">Cancelar</button>';
+    document.getElementById("btnCancelarLimpieza")
+      ?.addEventListener("click", cancelarCuentaRegresiva);
+  }
+
+  actualizar();
+
+  _timerLimpieza = setInterval(function () {
+    restantes--;
+    if (restantes <= 0) {
+      clearInterval(_timerLimpieza);
+      _timerLimpieza = null;
+      banner.className = "banner-cuenta-regresiva visible ok";
+      banner.innerHTML =
+        '<span class="cuenta-icono">✅</span>' +
+        '<span class="cuenta-texto">Formulario reiniciado para el siguiente vecino.</span>';
+      setTimeout(function () { banner.className = "banner-cuenta-regresiva"; }, 3500);
+      limpiarFormulario();
+    } else {
+      actualizar();
+    }
+  }, 1000);
+}
+
+function cancelarCuentaRegresiva() {
+  if (_timerLimpieza) { clearInterval(_timerLimpieza); _timerLimpieza = null; }
+  const banner = document.getElementById("bannerCuentaRegresiva");
+  if (banner) banner.className = "banner-cuenta-regresiva";
+}
+
 function mostrarBtnEnviar() {
   const btn = document.getElementById("btnEnviarSolicitud");
   if (!btn) return;
@@ -1008,49 +1088,83 @@ function mostrarBtnEnviar() {
 async function enviarSolicitudDOM() {
   if (!validarFormularioCip()) return;
   const panel = document.getElementById("panelEnvio");
-  if (panel) { panel.style.display = "block"; panel.innerHTML = '<p class="envio-generando">⏳ Generando solicitud completa…</p>'; panel.scrollIntoView({ behavior:"smooth", block:"nearest" }); }
+  if (panel) {
+    panel.style.display = "block";
+    panel.innerHTML = '<p class="envio-generando">⏳ Generando solicitud completa…</p>';
+    panel.scrollIntoView({ behavior:"smooth", block:"nearest" });
+  }
 
   try {
     const formBytes = await construirBytesPdfCip();
     const bytes     = await combinarConAdjuntos(formBytes);
 
-    const tipo  = (obtenerValor("tipoCertificado") || "CERT").replace(/[^a-zA-Z0-9]/g,"_");
-    const rol   = (obtenerValor("rolSii") || "SIN_ROL").replace(/[^a-zA-Z0-9\-]/g,"_");
-    const fecha = new Date().toISOString().slice(0,10);
-    const nombre = `Solicitud_DOM_${tipo}_${rol}_${fecha}.pdf`;
+    const tipo   = (obtenerValor("tipoCertificado") || "CERT").replace(/[^a-zA-Z0-9]/g,"_");
+    const rol    = (obtenerValor("rolSii") || "SIN_ROL").replace(/[^a-zA-Z0-9\-]/g,"_");
+    const fecha  = new Date().toISOString().slice(0,10);
+    const nombre = "Solicitud_DOM_" + tipo + "_" + rol + "_" + fecha + ".pdf";
     const file   = new File([bytes], nombre, { type: "application/pdf" });
 
     const emailDOM = (window.DOM_CONFIG?.contacto?.email) || "dom@mdonihue.cl";
-    const asunto   = encodeURIComponent(`Solicitud ${tipo.replace(/_/g," ")} – ROL ${rol} – ${fecha}`);
-    const cuerpo   = encodeURIComponent(`Estimados,\n\nAdjunto mi solicitud de certificado DOM.\n\nROL: ${rol}\nFecha: ${fecha}\n\nAtentamente,\n${obtenerValor("nombre")}`);
+    const asunto   = encodeURIComponent("Solicitud " + tipo.replace(/_/g," ") + " – ROL " + rol + " – " + fecha);
+    const cuerpo   = encodeURIComponent("Estimados,\n\nAdjunto mi solicitud de certificado DOM.\n\nROL: " + rol + "\nFecha: " + fecha + "\n\nAtentamente,\n" + obtenerValor("nombre"));
+    const wspNum   = (window.DOM_CONFIG?.contacto?.telefono || "").replace(/[^0-9]/g,"");
 
-    /* Intentar Web Share API (móvil) */
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ title: "Solicitud DOM Doñihue", text: `Solicitud ${tipo} – ROL ${rol}`, files: [file] });
-      if (panel) panel.innerHTML = '<p class="envio-ok">✅ Solicitud compartida correctamente.</p>';
+    /* iOS Safari exige que navigator.share() se llame directamente desde
+       un gesto del usuario. Como la generación del PDF es asíncrona, el
+       gesto original ya expiró cuando llegamos aquí. La solución es mostrar
+       un botón intermedio que dispara el share desde un toque fresco. */
+    const puedeCompartirArchivos = typeof navigator.canShare === "function" &&
+      (function () { try { return navigator.canShare({ files: [file] }); } catch(_) { return false; } })();
+
+    if (puedeCompartirArchivos) {
+      if (panel) {
+        panel.innerHTML =
+          '<p class="envio-desc">Solicitud lista. Toque el botón para enviarla:</p>' +
+          '<div class="envio-btns">' +
+          '<button type="button" class="btn btn-accent" id="btnCompartirAhora">📤 Tocar para compartir PDF</button>' +
+          '</div>';
+
+        document.getElementById("btnCompartirAhora")?.addEventListener("click", async function () {
+          try {
+            await navigator.share({ title: "Solicitud DOM Doñihue", text: "Solicitud " + tipo + " – ROL " + rol, files: [file] });
+            panel.innerHTML = '<p class="envio-ok">✅ Solicitud compartida correctamente.</p>';
+          } catch (shareErr) {
+            if (shareErr.name === "AbortError") return;
+            /* Si share falla igual, ofrecer descarga directa */
+            _mostrarFallbackDescarga(panel, bytes, nombre, emailDOM, asunto, cuerpo, wspNum);
+          }
+        });
+      }
     } else {
-      /* Fallback escritorio: descargar + botones */
-      const url = URL.createObjectURL(new Blob([bytes], { type:"application/pdf" }));
-      const a   = document.createElement("a"); a.href=url; a.download=nombre;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 2000);
-
-      if (panel) panel.innerHTML = `
-        <p class="envio-desc">El PDF fue descargado. Ahora puede enviarlo a la DOM:</p>
-        <div class="envio-btns">
-          <a class="btn btn-accent" href="mailto:${emailDOM}?subject=${asunto}&body=${cuerpo}">✉️ Abrir correo</a>
-          <a class="btn btn-wsp" href="https://wa.me/${(window.DOM_CONFIG?.contacto?.telefono||'').replace(/[^0-9]/g,'')}?text=${cuerpo}" target="_blank" rel="noopener">💬 WhatsApp DOM</a>
-        </div>
-        <p class="envio-hint">Adjunte manualmente el PDF descargado al mensaje.</p>`;
+      _mostrarFallbackDescarga(panel, bytes, nombre, emailDOM, asunto, cuerpo, wspNum);
     }
-  } catch(e) {
+
+  } catch (e) {
     if (e.name !== "AbortError") {
-      console.error(e);
-      if (panel) panel.innerHTML = '<p class="envio-error">❌ No se pudo generar la solicitud. Intente nuevamente.</p>';
+      console.error("enviarSolicitudDOM:", e);
+      if (panel) panel.innerHTML =
+        '<p class="envio-error">❌ No se pudo generar la solicitud.<br>' +
+        '<small style="font-weight:normal">' + (e.message || e) + '</small></p>' +
+        '<p class="envio-hint">Intente recargar la página e ingresar los datos nuevamente.</p>';
     } else {
       if (panel) panel.style.display = "none";
     }
   }
+}
+
+function _mostrarFallbackDescarga(panel, bytes, nombre, emailDOM, asunto, cuerpo, wspNum) {
+  const url = URL.createObjectURL(new Blob([bytes], { type:"application/pdf" }));
+  const a   = document.createElement("a"); a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+
+  if (panel) panel.innerHTML =
+    '<p class="envio-desc">El PDF fue descargado. Ahora puede enviarlo a la DOM:</p>' +
+    '<div class="envio-btns">' +
+    '<a class="btn btn-accent" href="mailto:' + emailDOM + '?subject=' + asunto + '&body=' + cuerpo + '">✉️ Abrir correo</a>' +
+    (wspNum ? '<a class="btn btn-wsp" href="https://wa.me/' + wspNum + '?text=' + cuerpo + '" target="_blank" rel="noopener">💬 WhatsApp DOM</a>' : '') +
+    '</div>' +
+    '<p class="envio-hint">Adjunte manualmente el PDF descargado al mensaje.</p>';
 }
 
 /* Combina el formulario PDF con los adjuntos (PDF e imágenes) en un solo PDF */
