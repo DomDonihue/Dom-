@@ -217,17 +217,18 @@ img {
 /* HERO */
 .hero {
   position: relative;
+  min-height: 720px;
   color: #fff;
   background: #0a1f3a;
   overflow: hidden;
 }
 .hero-bg-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: auto;
-  display: block;
-  min-height: 340px;
+  height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 30%;
 }
 /* Gradiente sobre la imagen */
 .hero::before {
@@ -259,6 +260,8 @@ img {
   position: absolute;
   inset: 0;
   z-index: 2;
+  display: flex;
+  align-items: center;
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
   gap: 32px;
