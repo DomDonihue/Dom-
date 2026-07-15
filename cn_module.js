@@ -241,6 +241,19 @@
     const aviso = document.getElementById("cn-aviso-cip");
     if (aviso) aviso.style.display = "block";
 
+    /* Aviso en tarjeta del mapa */
+    const avisoMapa = document.getElementById("cn-aviso-mapa");
+    if (avisoMapa) {
+      if (!calle) {
+        avisoMapa.className = "cn-aviso-mapa cn-aviso-mapa--error";
+        avisoMapa.innerHTML = "⚠️ Este registro no tiene dirección registrada. Por favor ingrese la dirección del predio manualmente en el mapa.";
+      } else {
+        avisoMapa.className = "cn-aviso-mapa cn-aviso-mapa--warn";
+        avisoMapa.innerHTML = "📍 Corrobore la ubicación del predio en el mapa — las coordenadas del registro pueden no ser exactas. Ajuste el marcador si es necesario.";
+      }
+      avisoMapa.style.display = "block";
+    }
+
     /* Ir al formulario CIP y luego marcar en el mapa */
     const seccion = document.getElementById("preparar-solicitud");
     if (seccion) {
