@@ -1504,6 +1504,18 @@ img {
   box-shadow: 0 20px 60px rgba(0,0,0,0.22);
 }
 
+.cn-busqueda-integrada {
+  background: var(--surface-alt, #f0f5fb);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 20px 14px;
+  margin-bottom: 28px;
+}
+.cn-busqueda-hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
 .cn-busqueda-row {
   display: flex;
   gap: 10px;
@@ -1680,6 +1692,96 @@ img {
   padding: 0 2px;
 }
 .doc-adjuntos-lista li button:hover { color: #ef4444; }
+
+/* ── OBRAS MENORES ── */
+.om-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.om-tab {
+  padding: 10px 22px;
+  border-radius: 30px;
+  border: 2px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.om-tab:hover    { border-color: #0f3c68; color: #0f3c68; }
+.om-tab--active  { background: #0f3c68; border-color: #0f3c68; color: #fff; }
+.om-panel        { display: none; flex-direction: column; gap: 10px; }
+.om-panel--active{ display: flex; }
+.om-actuacion    { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+.om-act-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.93rem;
+  color: #1e293b;
+  cursor: pointer;
+  transition: background .15s;
+}
+.om-act-btn:hover   { background: #f8fafc; }
+.om-act-btn[aria-expanded="true"] { background: #f0f7ff; }
+.om-act-btn[aria-expanded="true"] .om-act-chevron { transform: rotate(90deg); }
+.om-act-num {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: #0f3c68;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.om-act-chevron { margin-left: auto; font-size: 1rem; color: #94a3b8; transition: transform .2s; }
+.om-act-body    { display: none; overflow-x: auto; }
+.om-act-body.open { display: block; }
+.om-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+}
+.om-table th {
+  background: #f1f5f9;
+  color: #374151;
+  font-weight: 700;
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+.om-lista {
+  list-style: none;
+  padding: 14px 20px 16px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.om-lista li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.5;
+}
+.om-lista li::before {
+  content: "▸";
+  color: #0f3c68;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
 
 /* Chips / tags */
 .cn-chip, .cn-tag {
