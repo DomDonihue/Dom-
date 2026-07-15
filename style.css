@@ -143,6 +143,29 @@ img {
   color: #fff;
 }
 
+.btn-enviar {
+  background: linear-gradient(135deg, #0a6e3f, #0f9152);
+  color: #fff;
+}
+.btn-enviar:disabled { opacity: .45; cursor: not-allowed; }
+.btn-wsp {
+  background: #25d366; color: #fff;
+  border-radius: 8px; padding: 10px 18px;
+  font-size: .9rem; font-weight: 600;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+}
+.panel-envio {
+  margin-top: 18px; border-radius: 12px;
+  padding: 16px 18px; background: #f0fdf4;
+  border: 1.5px solid #86efac; font-size: .9rem;
+}
+.envio-generando { color: #374151; }
+.envio-ok        { color: #166534; font-weight: 600; }
+.envio-error     { color: #991b1b; font-weight: 600; }
+.envio-desc      { color: #374151; margin-bottom: 12px; }
+.envio-hint      { color: #6b7280; font-size: .82rem; margin-top: 10px; }
+.envio-btns      { display: flex; gap: 10px; flex-wrap: wrap; }
+
 .gov-btn {
   background: #ffffff;
   color: #0f69b4;

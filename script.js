@@ -568,7 +568,7 @@ function actualizarEstadoFlujo() {
   const hayConsentimiento = !consentimientoRequerido || (chkConsent ? chkConsent.checked : false);
   const ok = hayUbicacion && hayConsentimiento;
 
-  ["btnGuardarDatos","btnImprimirPdf","btnContinuarCelular"].forEach(id => {
+  ["btnGuardarDatos","btnImprimirPdf","btnContinuarCelular","btnEnviarSolicitud"].forEach(id => {
     const b = document.getElementById(id);
     if (b) b.disabled = !ok;
   });
@@ -722,6 +722,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const btnCelular = document.getElementById("btnContinuarCelular");
   if (btnCelular) btnCelular.addEventListener("click", mostrarModalQr);
+
+  const btnEnviar = document.getElementById("btnEnviarSolicitud");
+  if (btnEnviar) btnEnviar.addEventListener("click", enviarSolicitudDOM);
 
   const btnCerrarQr = document.getElementById("btnCerrarModalQr");
   if (btnCerrarQr) btnCerrarQr.addEventListener("click", () => {
@@ -972,6 +975,55 @@ async function construirBytesPdfCip() {
 
 
   return await pdfDoc.save();
+}
+
+/* Enviar solicitud completa (PDF + adjuntos) a la DOM desde el teléfono */
+async function enviarSolicitudDOM() {
+  if (!validarFormularioCip()) return;
+  const panel = document.getElementById("panelEnvio");
+  if (panel) { panel.style.display = "block"; panel.innerHTML = '<p class="envio-generando">⏳ Generando solicitud completa…</p>'; panel.scrollIntoView({ behavior:"smooth", block:"nearest" }); }
+
+  try {
+    const formBytes = await construirBytesPdfCip();
+    const bytes     = await combinarConAdjuntos(formBytes);
+
+    const tipo  = (obtenerValor("tipoCertificado") || "CERT").replace(/[^a-zA-Z0-9]/g,"_");
+    const rol   = (obtenerValor("rolSii") || "SIN_ROL").replace(/[^a-zA-Z0-9\-]/g,"_");
+    const fecha = new Date().toISOString().slice(0,10);
+    const nombre = `Solicitud_DOM_${tipo}_${rol}_${fecha}.pdf`;
+    const file   = new File([bytes], nombre, { type: "application/pdf" });
+
+    const emailDOM = (window.DOM_CONFIG?.contacto?.email) || "dom@mdonihue.cl";
+    const asunto   = encodeURIComponent(`Solicitud ${tipo.replace(/_/g," ")} – ROL ${rol} – ${fecha}`);
+    const cuerpo   = encodeURIComponent(`Estimados,\n\nAdjunto mi solicitud de certificado DOM.\n\nROL: ${rol}\nFecha: ${fecha}\n\nAtentamente,\n${obtenerValor("nombre")}`);
+
+    /* Intentar Web Share API (móvil) */
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ title: "Solicitud DOM Doñihue", text: `Solicitud ${tipo} – ROL ${rol}`, files: [file] });
+      if (panel) panel.innerHTML = '<p class="envio-ok">✅ Solicitud compartida correctamente.</p>';
+    } else {
+      /* Fallback escritorio: descargar + botones */
+      const url = URL.createObjectURL(new Blob([bytes], { type:"application/pdf" }));
+      const a   = document.createElement("a"); a.href=url; a.download=nombre;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+      if (panel) panel.innerHTML = `
+        <p class="envio-desc">El PDF fue descargado. Ahora puede enviarlo a la DOM:</p>
+        <div class="envio-btns">
+          <a class="btn btn-accent" href="mailto:${emailDOM}?subject=${asunto}&body=${cuerpo}">✉️ Abrir correo</a>
+          <a class="btn btn-wsp" href="https://wa.me/${(window.DOM_CONFIG?.contacto?.telefono||'').replace(/[^0-9]/g,'')}?text=${cuerpo}" target="_blank" rel="noopener">💬 WhatsApp DOM</a>
+        </div>
+        <p class="envio-hint">Adjunte manualmente el PDF descargado al mensaje.</p>`;
+    }
+  } catch(e) {
+    if (e.name !== "AbortError") {
+      console.error(e);
+      if (panel) panel.innerHTML = '<p class="envio-error">❌ No se pudo generar la solicitud. Intente nuevamente.</p>';
+    } else {
+      if (panel) panel.style.display = "none";
+    }
+  }
 }
 
 /* Combina el formulario PDF con los adjuntos (PDF e imágenes) en un solo PDF */
