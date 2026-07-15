@@ -731,8 +731,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnEnviar = document.getElementById("btnEnviarSolicitud");
   if (btnEnviar) btnEnviar.addEventListener("click", enviarSolicitudDOM);
 
-  /* Mostrar botón enviar si la página cargó desde un QR (ya está en el teléfono) */
-  if (window.location.search.includes("calle") || window.location.search.includes("rol")) {
+  /* Si es móvil: ocultar "Continuar en su teléfono" y mostrar "Enviar solicitud" directamente */
+  const esMobil = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
+  const desdeQR = window.location.search.includes("calle") || window.location.search.includes("rol");
+  if (esMobil || desdeQR) {
+    if (btnCelular) btnCelular.style.display = "none";
     mostrarBtnEnviar();
   }
 
