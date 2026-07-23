@@ -725,6 +725,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const btnCelular = document.getElementById("btnContinuarCelular");
   if (btnCelular) btnCelular.addEventListener("click", function() {
+    const listaAdj = document.getElementById("listaAdjuntos");
+    const adjuntados = listaAdj ? listaAdj.querySelectorAll("li").length : 0;
+    if (adjuntados === 0) {
+      let errAdj = document.getElementById("errorAdjuntoRequerido");
+      if (!errAdj) {
+        errAdj = document.createElement("p");
+        errAdj.id = "errorAdjuntoRequerido";
+        errAdj.className = "adjunto-requerido-msg";
+        const adjBox = document.querySelector(".doc-adjuntos-box");
+        if (adjBox) adjBox.appendChild(errAdj);
+      }
+      errAdj.textContent = "⚠️ Debe adjuntar al menos el Dominio Vigente o Copia de Escritura antes de continuar.";
+      document.querySelector(".doc-adjuntos-box")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    const errAdj = document.getElementById("errorAdjuntoRequerido");
+    if (errAdj) errAdj.textContent = "";
     mostrarModalQr();
     mostrarBtnEnviar();
     iniciarCuentaRegresiva(45);
