@@ -209,6 +209,14 @@
 
   /* ── Precargar formulario CIP principal ── */
   function precargarCip(rec) {
+    /* Limpiar buscador y ocultar lista de resultados de inmediato */
+    const _inputBusq  = document.getElementById("cn-busqueda");
+    const _btnLimpiar = document.getElementById("cn-btn-limpiar");
+    const _contenedor = document.getElementById("cn-resultados");
+    if (_inputBusq)  _inputBusq.value = "";
+    if (_contenedor) _contenedor.innerHTML = "";
+    if (_btnLimpiar) _btnLimpiar.style.display = "none";
+
     const set = (id, val) => {
       const el = document.getElementById(id);
       if (el && val !== undefined && val !== null && String(val).trim()) {
@@ -257,7 +265,7 @@
     /* Ir al mapa para que el usuario corrobore la ubicación */
     setTimeout(() => {
       const mapa = document.getElementById("mapaPredio");
-      if (mapa) mapa.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (mapa) mapa.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 900);
 
     /* Geocodificar: expandir abreviaturas y pasar centroide como fallback */
@@ -277,13 +285,6 @@
       "ok"
     );
 
-    /* Limpiar buscador y ocultar resultados al cargar en formulario */
-    const inputBusq  = document.getElementById("cn-busqueda");
-    const btnLimpiar = document.getElementById("cn-btn-limpiar");
-    const contenedor = document.getElementById("cn-resultados");
-    if (inputBusq)  inputBusq.value = "";
-    if (contenedor) contenedor.innerHTML = "";
-    if (btnLimpiar) btnLimpiar.style.display = "none";
   }
 
   /* ── Descargar CIP pre-llenado ── */
