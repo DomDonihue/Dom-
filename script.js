@@ -748,8 +748,10 @@ document.addEventListener("DOMContentLoaded", function () {
   const esMobil = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   if (desdeQR || esMobil) {
-    /* Estamos en el teléfono: no tiene sentido "continuar en teléfono" */
+    /* Estamos en el teléfono: mostrar adjuntos y botón enviar */
     if (btnCelular) btnCelular.style.display = "none";
+    const panelAdj = document.getElementById("panelAdjuntos");
+    if (panelAdj) panelAdj.style.display = "";
     mostrarBtnEnviar();
   }
 
