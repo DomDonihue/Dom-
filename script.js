@@ -731,37 +731,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const btnCelular = document.getElementById("btnContinuarCelular");
   if (btnCelular) btnCelular.addEventListener("click", function() {
     const panelAdj = document.getElementById("panelAdjuntos");
-
-    /* Primera vez: mostrar panel y pedir adjunto */
-    if (panelAdj && panelAdj.style.display === "none") {
-      panelAdj.style.display = "";
-      /* Agregar mensaje de requerido si no existe */
-      if (!document.getElementById("msgAdjuntoRequerido")) {
-        const msg = document.createElement("p");
-        msg.id = "msgAdjuntoRequerido";
-        msg.className = "adjunto-requerido-msg";
-        msg.textContent = "⚠️ Adjunte el Dominio Vigente o Copia de Escritura para continuar.";
-        panelAdj.appendChild(msg);
-      }
-      setTimeout(() => panelAdj.scrollIntoView({ behavior: "smooth", block: "center" }), 80);
-      return;
-    }
-
-    /* Validar que haya al menos un archivo adjunto */
-    const listaAdj = document.getElementById("listaAdjuntos");
-    const adjuntados = listaAdj ? listaAdj.querySelectorAll("li").length : 0;
-    if (adjuntados === 0) {
-      const msg = document.getElementById("msgAdjuntoRequerido");
-      if (msg) {
-        msg.textContent = "⚠️ Debe adjuntar el Dominio Vigente o Copia de Escritura antes de continuar.";
-        msg.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-      return;
-    }
-
-    /* Todo OK: ocultar mensaje y mostrar QR */
-    const msg = document.getElementById("msgAdjuntoRequerido");
-    if (msg) msg.remove();
+    if (panelAdj) panelAdj.style.display = "";
     mostrarModalQr();
     mostrarBtnEnviar();
     iniciarCuentaRegresiva(45);
