@@ -290,8 +290,12 @@
   /* ── Descargar CIP pre-llenado ── */
   async function descargarCipPreLlenado(rec) {
     if (typeof XLSX === "undefined") {
-      alert("La librería de Excel aún no ha cargado. Espere un momento e intente nuevamente.");
-      return;
+      await new Promise((resolve, reject) => {
+        const s = document.createElement("script");
+        s.src = "https://unpkg.com/xlsx/dist/xlsx.full.min.js";
+        s.onload = resolve; s.onerror = reject;
+        document.head.appendChild(s);
+      });
     }
 
     const { calle, numero, localidad } = parsearDireccion(rec.d);

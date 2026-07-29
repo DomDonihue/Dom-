@@ -3,6 +3,27 @@
    NO editar. Toda la configuración está en config.js
    ================================================================ */
 
+/* ── carga diferida de librerías pesadas ── */
+const _scriptsYaCargados = {};
+function _cargarScript(url) {
+  if (_scriptsYaCargados[url]) return _scriptsYaCargados[url];
+  _scriptsYaCargados[url] = new Promise((resolve, reject) => {
+    if (document.querySelector('script[src="' + url + '"]')) { resolve(); return; }
+    const s = document.createElement("script");
+    s.src = url;
+    s.onload  = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return _scriptsYaCargados[url];
+}
+async function _asegurarPdfLib() {
+  await _cargarScript("https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js");
+}
+async function _asegurarHtml2canvas() {
+  await _cargarScript("https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js");
+}
+
 /* ── helpers ── */
 function cfg(clave, def) {
   return (window.DOM_CONFIG && Object.prototype.hasOwnProperty.call(window.DOM_CONFIG, clave))
@@ -838,6 +859,7 @@ async function cargarPdfBaseCip() {
 }
 
 async function capturarMapaParaPdf() {
+  await _asegurarHtml2canvas();
   if (mapaPredio) mapaPredio.invalidateSize();
   const canvas = await html2canvas(document.getElementById("mapaPredio"),{
     useCORS:true, allowTaint:false, backgroundColor:"#ffffff", scale:2, foreignObjectRendering:false
@@ -890,6 +912,7 @@ const CHECKBOXES_PDF = {
 
 /* Genera el PDF y devuelve los bytes (Uint8Array). Lanzará error si algo falla. */
 async function construirBytesPdfCip() {
+  await _asegurarPdfLib();
   const { PDFDocument, rgb, StandardFonts } = PDFLib;
   const pdfDoc  = await PDFDocument.load(await cargarPdfBaseCip());
     const pagina  = pdfDoc.getPages()[0];
