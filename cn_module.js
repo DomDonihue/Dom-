@@ -254,11 +254,11 @@
       avisoMapa.style.display = "block";
     }
 
-    /* Ir al formulario CIP y luego marcar en el mapa */
-    const seccion = document.getElementById("preparar-solicitud");
-    if (seccion) {
-      setTimeout(() => seccion.scrollIntoView({ behavior: "smooth", block: "start" }), 180);
-    }
+    /* Ir al mapa para que el usuario corrobore la ubicación */
+    setTimeout(() => {
+      const mapa = document.getElementById("mapaPredio");
+      if (mapa) mapa.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 900);
 
     /* Geocodificar: expandir abreviaturas y pasar centroide como fallback */
     const calleExpandida = expandirAbreviaturas(calle);
