@@ -1303,7 +1303,7 @@ function mostrarEstadoRut() {
   if(!inp||!m) return true;
   const v=inp.value.trim(); if(!v){inp.style.borderColor="";inp.setCustomValidity("");m.textContent="";return false;}
   inp.value=formatearRut(v);
-  if(validarRutChileno(inp.value)){inp.style.borderColor="#16a34a";inp.setCustomValidity("");m.textContent="RUT válido.";m.style.color="#0f6b45";return true;}
+  if(validarRutChileno(inp.value)){inp.style.borderColor="#16a34a";inp.setCustomValidity("");m.textContent="";return true;}
   inp.style.borderColor="#dc2626";inp.setCustomValidity("RUT inválido.");m.textContent="RUT inválido. Revise el número o dígito verificador.";m.style.color="#b91c1c";return false;
 }
 function activarValidacionRut() {
