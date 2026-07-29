@@ -276,6 +276,14 @@
       `✓ Datos cargados en el formulario: ${calle}${numero ? " " + numero : ""}${localidad ? ", " + localidad : ""}. Buscando ubicación en el mapa…`,
       "ok"
     );
+
+    /* Limpiar buscador y ocultar resultados al cargar en formulario */
+    const inputBusq  = document.getElementById("cn-busqueda");
+    const btnLimpiar = document.getElementById("cn-btn-limpiar");
+    const contenedor = document.getElementById("cn-resultados");
+    if (inputBusq)  inputBusq.value = "";
+    if (contenedor) contenedor.innerHTML = "";
+    if (btnLimpiar) btnLimpiar.style.display = "none";
   }
 
   /* ── Descargar CIP pre-llenado ── */
