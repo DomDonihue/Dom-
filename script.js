@@ -79,22 +79,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const heroBgImg = document.getElementById("heroBgImg");
   if (heroBgImg && hero.imagenFondo) heroBgImg.src = hero.imagenFondo;
 
-  /* video */
-  const vid = cfg("video", { mostrar: true });
-  const secVideo = document.getElementById("seccionVideo");
-  if (secVideo) secVideo.style.display = vid.mostrar ? "" : "none";
-  if (vid.mostrar) {
-    const sourceEl = document.getElementById("videoSrc");
-    const videoEl  = document.getElementById("videoEl");
-    if (sourceEl && vid.archivo) {
-      sourceEl.src = vid.archivo;
-      /* Hay que llamar load() en el <video> para que el navegador
-         recargue el nuevo src asignado por JavaScript */
-      if (videoEl) videoEl.load();
-    }
-    setText("videoTitulo",     vid.titulo     || "");
-    setText("videoDescripcion",vid.descripcion|| "");
-  }
 
   /* footer */
   const footerMuni = cfg("municipalidadCorta", cfg("municipalidad", ""));

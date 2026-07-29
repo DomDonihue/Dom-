@@ -77,25 +77,6 @@
     </div>
   </section>
 
-  <!-- VIDEO -->
-  <section id="seccionVideo" class="section video-section">
-    <div class="container video-grid">
-      <div class="video-box">
-        <video id="videoEl" controls preload="metadata">
-          <source id="videoSrc" src="./img/video/VideoDOM.mp4" type="video/mp4">
-          Tu navegador no soporta el video.
-        </video>
-      </div>
-      <div class="video-info">
-        <span class="section-kicker">Transformación digital</span>
-        <h2 id="videoTitulo"></h2>
-        <p id="videoDescripcion"></p>
-        <a class="btn btn-accent" id="btnVideoDom" href="#" target="_blank">Ir a DOM en Línea</a>
-      </div>
-    </div>
-  </section>
-
-
   <!-- CERTIFICADOS -->
   <section class="section" id="certificados">
     <div class="container">
@@ -566,7 +547,7 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const url = (window.DOM_CONFIG && window.DOM_CONFIG.urlDomEnLinea) || "https://domenlinea.minvu.cl/";
-      ["btnHeroDom","btnVideoDom","btnCtaDom","footerLinkDom"].forEach(id => {
+      ["btnHeroDom","btnCtaDom","footerLinkDom"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.href = url;
       });
